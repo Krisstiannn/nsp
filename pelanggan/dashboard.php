@@ -1,9 +1,7 @@
 <?php
-include "/xampp/htdocs/nsp/services/koneksi.php";
 session_start();
-$id_karyawan = $_SESSION['id_karyawan'] ?? null;
-$query_jumlah = "SELECT COUNT(*) AS total_pekerjaan FROM wo WHERE id_karyawan = '$id_karyawan'";
-$result_tampilJumlah = $conn->query($query_jumlah)->fetch_assoc();
+include "/xampp/htdocs/nsp/services/koneksi.php";
+$test = $_SESSION['id_users'] ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +31,7 @@ $result_tampilJumlah = $conn->query($query_jumlah)->fetch_assoc();
                         <div class="container-fluid text-black">
                             <div class="row mb-2">
                                 <div class="col-sm-12">
-                                    <h1 class="m-0">Selamat Datang ... di Website Resmi Net Sun Power</h1>
+                                    <h1 class="m-0">Selamat Datang <?= $test?> di Website Resmi Net Sun Power</h1>
                                 </div>
                             </div>
                         </div>
@@ -74,15 +72,9 @@ $result_tampilJumlah = $conn->query($query_jumlah)->fetch_assoc();
                                             </tr>
                                             <tr>
                                                 <td>2.</td>
-                                                <td>Paket 5 Perangkat</td>
+                                                <td>Paket 6 Perangkat</td>
                                                 <td>5 Mbps</td>
                                                 <td>Rp. 160.000</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3.</td>
-                                                <td>Paket 8 Perangkat</td>
-                                                <td>8 Mbps</td>
-                                                <td>Rp. 175.000</td>
                                             </tr>
                                             <tr>
                                                 <td>4.</td>

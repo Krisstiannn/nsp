@@ -26,7 +26,7 @@ if (isset($_POST['btn_absen'])) {
         if($validasi_absen->num_rows>0) {
             echo "<script>alert('Anda sudah absen masuk hari ini!');</script>";
             header("Location: " . $_SERVER['PHP_SELF']);
-            exit;
+            exit();
         }
 
         $sql = "INSERT INTO absen (id, id_karyawan, nip_karyawan, nama_karyawan, tanggal, jam_masuk) 
@@ -36,9 +36,11 @@ if (isset($_POST['btn_absen'])) {
             if ($result === TRUE) {
                 echo "<script type='text/javascript'>alert('Absen BERHASIL Dilakukan!');</script>";
                 header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
             } else {
                 echo "<script type='text/javascript'>alert('Absen GAGAL Di Lakukan!');</script>";
                 header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
             }
     } else {
         echo "<script type='text/javascript'>alert('Data Karyawan Tidak Ditemukan!');</script>";
@@ -65,13 +67,16 @@ if (isset($_POST['absen_keluar'])) {
             if ($conn->query($update) === TRUE) {
                 echo "<script>alert('Terima Kasih Sudah Berjuang Hari Ini :)');</script>";
                 header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
             } else {
                 echo "<script>alert('Gagal memperbarui jam keluar.');</script>";
                 header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
             }
         } else {
             echo "<script>alert('Anda sudah melakukan absen keluar hari ini!');</script>";
             header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
         }
     } else {
         echo "<script>alert('Anda belum absen masuk hari ini!');</script>";

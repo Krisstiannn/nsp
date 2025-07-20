@@ -4,10 +4,20 @@ session_start();
 
 $id_karyawan = $_SESSION['id_karyawan'] ?? null;
 
-$query = "SELECT psb.nama_pelanggan, psb.alamat_pelanggan, psb.id, psb.id_langganan, wo.id_karyawan
-            FROM psb 
-            JOIN wo ON wo.id_psb = psb.id 
-            WHERE wo.id_karyawan = '$id_karyawan'";
+$query = "SELECT 
+            psb.nama_pelanggan, 
+            psb.alamat_pelanggan, 
+            psb.id, 
+            psb.id_langganan, 
+            psb.paket_internet, 
+            psb.wa_pelanggan,
+            psb.rumah_pelanggan,
+            psb.ktp_pelanggan, 
+            wo.id_karyawan, 
+            wo.id_psb
+          FROM psb 
+          JOIN wo ON wo.id_psb = psb.id 
+          WHERE wo.id_karyawan = '$id_karyawan'";
 $result = $conn->query($query);
 ?>
 <!DOCTYPE html>
@@ -91,7 +101,11 @@ $result = $conn->query($query);
                                                     <th>Nomor Working Order</th>
                                                     <th>ID Langganan</th>
                                                     <th>Nama Pelanggan</th>
+                                                    <th>No Telpon Pelanggan</th>
                                                     <th>Alamat Rumah/Tikor</th>
+                                                    <th>KTP Pelanggan</th>
+                                                    <th>Foto Rumah Pelanggan</th>
+                                                    <th>Paket Internet</th>
                                                     <th>Status Pekerjaan</th>
                                                     <th>Action</th>
                                                 </tr>
@@ -100,44 +114,66 @@ $result = $conn->query($query);
                                                 <?php foreach ($result as $pekerjaan) {
                                                     $id_pekerjaan = $pekerjaan['id'];
 
-                                                    // Ambil semua status pekerjaan berdasarkan no_wo
                                                     $query_status = "SELECT status FROM report_pemasangan WHERE no_wo = '$id_pekerjaan'";
                                                     $result_status = $conn->query($query_status);
 
                                                     $total = 0;
+                                                    $perjalanan = 0;
+                                                    $dilokasi = 0;
                                                     $selesai = 0;
                                                     $kendala = 0;
+                                                    $ogp = 0;
 
                                                     while ($row_status = $result_status->fetch_assoc()) {
                                                         $total++;
-                                                        if ($row_status['status'] === 'selesai') {
+                                                        if ($row_status['status'] === 'SELESAI') {
                                                             $selesai++;
-                                                        } elseif ($row_status['status'] === 'kendala') {
+                                                        } elseif ($row_status['status'] === 'KENDALA') {
                                                             $kendala++;
+                                                        } elseif ($row_status['status'] === 'DALAM PERJALANAN') {
+                                                            $perjalanan++;
+                                                        } elseif ($row_status['status'] === 'SAMPAI DILOKASI') {
+                                                            $dilokasi++;
+                                                        } elseif ($row_status['status'] === 'ON GOING PROGRES') {
+                                                            $ogp++;
                                                         }
                                                     }
 
-                                                    if ($kendala > 0) {
+                                                    if ($perjalanan > 0) {
+                                                        $status = '<span class="badge bg-info">SEDANG DALAM PERJALANAN</span>';
+                                                    } elseif ($dilokasi >0) {
+                                                        $status = '<span class="badge bg-primary">SAMPAI DILOKASI</span>';
+                                                    } elseif ($kendala > 0) {
                                                         $status = '<span class="badge bg-danger">KENDALA</span>';
+                                                    } elseif ($ogp > 0) {
+                                                        $status = '<span class="badge bg-warning">ON GOING PROGRES</span>';
                                                     } elseif ($total > 0 && $selesai === $total) {
                                                         $status = '<span class="badge bg-success">SELESAI</span>';
                                                     } else {
-                                                        $status = '<span class="badge bg-warning">ON GOING PROGRESS</span>';
+                                                        $status = '<span class="badge bg-secondary">TIKET DITERIMA</span>';
                                                     }
                                                 ?>
-                                                    <tr>
-                                                        <td><?= $pekerjaan['id'] ?></td>
-                                                        <td><?= $pekerjaan['id_langganan']?></td>
-                                                        <td><?= $pekerjaan['nama_pelanggan'] ?></td>
-                                                        <td><?= $pekerjaan['alamat_pelanggan'] ?></td>
-                                                        <td><?= $status ?></td>
-                                                        <td>
-                                                            <a class="btn btn-warning btn-sm"
-                                                                href="report-pemasangan.php?id=<?= $pekerjaan['id'] ?>">
-                                                                <i class="fas fa-pencil-alt"></i> Laporkan
-                                                            </a>
-                                                        </td>
-                                                    </tr>
+                                                <tr>
+                                                    <td><?= $pekerjaan['id'] ?></td>
+                                                    <td><?= $pekerjaan['id_langganan']?></td>
+                                                    <td><?= $pekerjaan['nama_pelanggan'] ?></td>
+                                                    <td><?= $pekerjaan['wa_pelanggan']?></td>
+                                                    <td><?= $pekerjaan['alamat_pelanggan']?></td>
+                                                    <td><img src="/nsp/storage/img/<?= $pekerjaan['rumah_pelanggan'] ?>"
+                                                            alt="<?= $pekerjaan['rumah_pelanggan'] ?>" style="width: 100px;">
+                                                    </td>
+                                                    <td><img src="/nsp/storage/img/<?= $pekerjaan['ktp_pelanggan'] ?>"
+                                                            alt="<?= $pekerjaan['ktp_pelanggan'] ?>" style="width: 100px;">
+                                                    </td>
+                                                    <td><?= $pekerjaan['paket_internet']?></td>
+                                                    <td><?= $status ?></td>
+                                                    <td>
+                                                        <a class="btn btn-warning btn-sm"
+                                                            href="report-pemasangan.php?id=<?= $pekerjaan['id'] ?>">
+                                                            <i class="fas fa-pencil-alt"></i> Laporkan
+                                                        </a>
+                                                    </td>
+                                                </tr>
                                                 <?php } ?>
                                             </tbody>
                                         </table>

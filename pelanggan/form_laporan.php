@@ -1,34 +1,31 @@
 <?php
-include "/xampp/htdocs/nsp/services/koneksi.php";
 session_start();
+include "/xampp/htdocs/nsp/services/koneksi.php";
+$id_user = $_SESSION['id_users'] ?? null;
+$data = "SELECT * FROM pelanggan WHERE id_user = '$id_user'";
+$hasil = $conn->query($data)->fetch_assoc();
 
 if (isset($_POST['btn_submit'])) {
-    $nama_pelanggan = $_POST['nama_pelanggan'];
-    $no_telp = $_POST['no_wa'];
+    $nama = $_POST['nama_pelanggan'];
+    $no_inet = $_POST['id_langganan'];
     $alamat = $_POST['alamat'];
+    $no_telp = $_POST['no_telp'];
     $keluhan = $_POST['keluhan'];
 
-    if (empty($nama_pelanggan) || empty($no_telp) || empty($alamat) || empty($keluhan)) {
-        echo "<script type= 'text/javascript'>
-                alert('Tolong isi data dengan benar!');
-                document.location.href = 'form_pemasangan.php';
-            </script>";
-        die();
-    } else {
-        $query_tambah = "INSERT INTO perbaikan (id_perbaikan, nama_pelanggan, no_telp, alamat, keluhan) VALUES ('', '$nama_pelanggan', '$no_telp', '$alamat', '$keluhan')";
-        $result_tambah = $conn->query($query_tambah);
+    $insert_laporan = "INSERT INTO perbaikan (id_perbaikan, id_user, id_berlangganan, nama_pelanggan, no_telp, alamat, keluhan) 
+               VALUES ('', '$id_user', '$no_inet', '$nama', '$no_telp', '$alamat', '$keluhan')";
+    $result = $conn->query($insert_laporan);
 
-        if ($result_tambah) {
-            echo "<script type= 'text/javascript'>
-                alert('Laporan Anda Berhasil , Silahkan Tunggu!');
-                document.location.href = 'dashboard.php';
+    if($result) {
+        echo "<script type= 'text/javascript'>
+                alert('Data Berhasil disimpan!');
+                document.location.href = 'status_perbaikan.php';
             </script>";
-        } else {
-            echo "<script type= 'text/javascript'>
-                alert('Data Gagal disimpan!');
-                document.location.href = 'form_pemasangan.php';
+    } else {
+        echo "<script type= 'text/javascript'>
+                alert('Data Berhasil disimpan!');
+                document.location.href = 'form_laporan.php';
             </script>";
-        }
     }
 }
 ?>
@@ -75,28 +72,40 @@ if (isset($_POST['btn_submit'])) {
                                 <form action="" method="POST">
                                     <div class="card-body">
                                         <div class="form-group">
-                                            <label for="nama">Nama Pelanggan</label>
-                                            <input type="text" class="form-control" name="nama_pelanggan"
-                                                placeholder="Nama Pelanggan">
+                                            <label for="langganan">ID Berlangganan</label>
+                                            <input type="hidden" name="id_langganan"
+                                                value="<?= $hasil['id_langganan'] ?>">
+                                            <input type="text" class="form-control" name="id_langganan"
+                                                value="<?= $hasil['id_langganan'] ?>" disabled>
                                         </div>
                                         <div class="form-group">
-                                            <label for="whatsapp">No WA</label>
-                                            <input type="text" class="form-control" name="no_wa" placeholder="NO WA">
+                                            <label for="nama_pelanggan">Nama Pelanggan</label>
+                                            <input type="hidden" name="nama_pelanggan"
+                                                value="<?= $hasil['nama_pelanggan'] ?>">
+                                            <input type="text" class="form-control" name="nama_pelanggan"
+                                                value="<?= $hasil['nama_pelanggan'] ?>" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="no_telp">No Telepon/No WhatsApp</label>
+                                            <input type="hidden" name="no_telp" value="<?= $hasil['wa_pelanggan'] ?>">
+                                            <input type="text" class="form-control" name="no_telp"
+                                                value="<?= $hasil['wa_pelanggan'] ?>" disabled>
                                         </div>
                                         <div class="form-group">
                                             <label for="alamat">Alamat atau Titik Kordinat</label>
                                             <textarea type="text" class="form-control" name="alamat"
-                                                placeholder="Alamat Lengkap Rumah"></textarea>
+                                                placeholder="Alamat Lengkap Rumah" required></textarea>
                                         </div>
                                         <div class="form-group">
                                             <label for="keluhan">Keluhan</label>
                                             <textarea type="text" class="form-control" name="keluhan"
-                                                placeholder="Tuliskan detail keluhan"></textarea>
+                                                placeholder="Tuliskan detail keluhan" required></textarea>
                                         </div>
                                     </div>
                                     <div class="card-footer">
                                         <button type="submit" class="btn btn-success" name="btn_submit">Submit</button>
-                                        <a href="dashboard.php" type="submit" class="btn btn-danger" name="btn_cancel">Cancel</a>
+                                        <a href="dashboard.php" type="submit" class="btn btn-danger"
+                                            name="btn_cancel">Cancel</a>
                                     </div>
                                 </form>
                             </div>
@@ -128,9 +137,9 @@ if (isset($_POST['btn_submit'])) {
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script>
-    $(function() {
-        bsCustomFileInput.init();
-    });
+        $(function () {
+            bsCustomFileInput.init();
+        });
     </script>
 </body>
 

@@ -1,23 +1,24 @@
 <?php
-include "/xampp/htdocs/nsp/services/koneksi.php";
 session_start();
+include "/xampp/htdocs/nsp/services/koneksi.php";
+
+$id_user = $_SESSION['id_users'];
+$nama_pelanggan = $_SESSION['nama_pelanggan'];
+
+$queryPelanggan = "SELECT * FROM perbaikan WHERE id_user = '$id_user' ORDER BY id_perbaikan DESC";
+$resultPelanggan = $conn->query($queryPelanggan);
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap"
-        rel="stylesheet">
     <link rel="stylesheet" href="/nsp/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="/nsp/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
     <link rel="stylesheet" href="/nsp/dist/css/adminlte.min.css">
-    <link rel="icon" href="/nsp/storage/netsun.jpg">
 </head>
 
 <body class="hold-transition layout-top-nav">
@@ -26,44 +27,72 @@ session_start();
         <div class="content-wrapper">
             <div class="content">
                 <div class="container">
-                    <div class="content-header">
-                        <div class="container-fluid text-black">
-                            <div class="row mb-2">
-                                <div class="col-sm-12">
-                                    <h1 class="m-0">Selamat Datang ... di Website Resmi Net Sun Power</h1>
-                                </div>
+                    <section class="content-header">
+                        <h1 class="m-0">Status Tiket Perbaikan Anda</h1>
+                    </section>
+
+                    <section class="content">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Riwayat Tiket Perbaikan</h3>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>ID Langganan</th>
+                                            <th>Keluhan</th>
+                                            <th>Teknisi</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                    $no = 1;
+                    while ($dataPelanggan = $resultPelanggan->fetch_assoc()) {
+                      $id_langganan = $dataPelanggan['id_berlangganan'];
+                      $keluhan = $dataPelanggan['keluhan'];
+                      $id_perbaikan = $dataPelanggan['id_perbaikan'];
+
+                      $teknisi = '-';
+                      $status = 'Tiket Sudah Diberikan Ke Teknisi';
+
+                      $queryWO = "SELECT * FROM wo WHERE id_perbaikan = '$id_perbaikan'";
+                      $resultWO = $conn->query($queryWO);
+
+                      if ($resultWO->num_rows > 0) {
+                        $dataWO = $resultWO->fetch_assoc();
+                        $id_teknisi = $dataWO['id_karyawan'];
+
+                        $queryTeknisi = "SELECT nama_karyawan FROM karyawan WHERE id = '$id_teknisi'";
+                        $resultTeknisi = $conn->query($queryTeknisi);
+                        if ($resultTeknisi->num_rows > 0) {
+                          $teknisi = $resultTeknisi->fetch_assoc()['nama_karyawan'];
+                        }
+                      }
+
+                      $queryReport = "SELECT status FROM report_perbaikan WHERE no_wo = '$id_perbaikan' ORDER BY id DESC LIMIT 1";
+                      $resultReport = $conn->query($queryReport);
+                      if ($resultReport->num_rows > 0) {
+                        $status = $resultReport->fetch_assoc()['status'];
+                      } 
+
+                      echo "<tr>
+                              <td>$no</td>
+                              <td>$id_langganan</td>
+                              <td>$keluhan</td>
+                              <td>$teknisi</td>
+                              <td>$status</td>
+                            </tr>";
+                      $no++;
+                    }
+                    ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">Status Pekerjaan Perbaikan</h3>
-                                </div>
-                                <div class="card-body">
-                                    <ul class="list-group list-group-unbordered mb-3">
-                                        <li class="list-group-item">
-                                            <b>ID Pelanggan</b>
-                                            <p class="float-right">16...</p>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <b>Nama Pelangan</b>
-                                            <p class="float-right">...</p>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <b>Keluhan</b>
-                                            <p class="float-right">...</p>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <b>Status Pekerjaan</b>
-                                            <p class="float-right">Selesai/On Progress</p>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </section>
                 </div>
             </div>
         </div>

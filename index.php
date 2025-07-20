@@ -51,11 +51,11 @@
                     <ul class="space-y-2">
                         <li class="flex justify-between border-b pb-2">
                             <span>Paket 3 Mbps - 4 Perangkat</span>
-                            <span class="text-blue-700 font-semibold">Rp 160.000</span>
+                            <span class="text-blue-700 font-semibold">Rp 130.000</span>
                         </li>
                         <li class="flex justify-between border-b pb-2">
                             <span>Paket 5 Mbps - 6 Perangkat</span>
-                            <span class="text-blue-700 font-semibold">Rp 180.000</span>
+                            <span class="text-blue-700 font-semibold">Rp 160.000</span>
                         </li>
                         <li class="flex justify-between border-b pb-2">
                             <span>Paket 10 Mbps - 12 Perangkat</span>
@@ -64,7 +64,7 @@
                     </ul>
                 </div>
 
-                <div class="bg-gray-100 p-6 rounded-lg shadow hover:shadow-lg transition">
+                <!-- <div class="bg-gray-100 p-6 rounded-lg shadow hover:shadow-lg transition">
                     <h3 class="font-semibold text-lg mb-2">NSP Coorporate</h3>
                     <p class="text-gray-700 mb-2">Internet yang diperuntukan bagi sebuah instansi pemerintahan ataupun
                         instansi swasta.</p>
@@ -76,7 +76,7 @@
                     <p class="text-gray-700 mb-2">Internet yang diperuntukan bagi sebuah instansi pemerintahan ataupun
                         instansi swasta yang berukuran menengah ke bawah.</p>
                     <p class="text-blue-700 font-bold">Rp 1.500.000</p>
-                </div>
+                </div> -->
 
             </div>
         </div>

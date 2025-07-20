@@ -1,7 +1,6 @@
 <?php
 include "/xampp/htdocs/nsp/services/koneksi.php";
 if (isset($_POST['btn_logout'])) {
-    session_start();
     session_destroy();
     echo "<script type= 'text/javascript'>
     alert('Anda Telah Keluar!');
@@ -71,7 +70,7 @@ if (isset($_POST['btn_logout'])) {
 
         <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
             <li class="nav-item dropdown d-flex align-items-center">
-                <!-- <span class="text-light mr-2"><?= $_SESSION['nama_pelanggan']?></span> -->
+                <span class="text-light mr-2"><?= $_SESSION['nama_pelanggan']?></span>
 
                 <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                     class="nav-link p-0">

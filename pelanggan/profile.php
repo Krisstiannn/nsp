@@ -2,7 +2,19 @@
 include "/xampp/htdocs/nsp/services/koneksi.php";
 session_start();
 $id_users = $_SESSION['id_users'] ?? null;
-$data = "SELECT * FROM pelanggan WHERE id_user = '$id_users'";
+$data = "SELECT 
+            p.id_langganan, 
+            p.nama_pelanggan, 
+            p.jenis_layanan, 
+            p.status_pelanggan,
+            p.username,
+            p.password,
+            j.jenis_paket,
+            j.kecepatan,
+            j.harga 
+        FROM pelanggan p 
+        JOIN jenis_paket j ON j.jenis_paket = p.jenis_layanan 
+        WHERE id_user = '$id_users'";
 $hasil = $conn->query($data)->fetch_assoc();
 ?>
 <!DOCTYPE html>
@@ -55,7 +67,7 @@ $hasil = $conn->query($data)->fetch_assoc();
                                 <b>Jenis Paket</b> <p class="float-right"><?= $hasil['jenis_layanan']?></p>
                             </li>
                             <li class="list-group-item">
-                                <b>Kecepatan</b> <p class="float-right"><?= $hasil['jenis_layanan']?></p>
+                                <b>Kecepatan</b> <p class="float-right"><?= $hasil['kecepatan']?></p>
                             </li>
                             <li class="list-group-item">
                                 <b>Status</b> <p class="float-right"><?= $hasil['status_pelanggan']?></p>
@@ -64,13 +76,13 @@ $hasil = $conn->query($data)->fetch_assoc();
                                 <b>Jatuh Tempo</b> <p class="float-right">Tanggal 15</p>
                             </li>
                             <li class="list-group-item">
-                                <b>Biaya Bulanan</b> <p class="float-right">Rp. 130.000</p>
+                                <b>Biaya Bulanan</b> <p class="float-right"><?= "Rp. " . number_format($hasil['harga'], 0, ',', '.');?></p>
                             </li>
                             <li class="list-group-item">
-                                <b>Username</b> <p class="float-right">username</p>
+                                <b>Username</b> <p class="float-right"><?= $hasil['username']?></p>
                             </li>
                             <li class="list-group-item">
-                                <b>Password</b> <p class="float-right">password</p>
+                                <b>Password</b> <p class="float-right"><?= $hasil['password']?></p>
                             </li>
                         </ul>
                         <ul class="list-group list-group-unbordered">

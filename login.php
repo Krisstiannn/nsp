@@ -4,35 +4,39 @@ include "./services/koneksi.php";
 
 $notifikasi_login = "";
 if (isset($_POST['btn_login'])) {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    $username = htmlspecialchars(trim($_POST['username']));
+    $password = htmlspecialchars(trim($_POST['password']));
 
     $query_users = "SELECT users.id_users, users.username, users.password, users.peran, 
                            karyawan.nip_karyawan, karyawan.nama_karyawan, karyawan.id, 
-                           pelanggan.nama_pelanggan,
-                           psb.nama_pelanggan
+                           pelanggan.nama_pelanggan
                 FROM users 
                 LEFT JOIN karyawan ON users.username = karyawan.nip_karyawan
-                LEFT JOIN pelanggan ON users.username = pelanggan.nama_pelanggan
-                LEFT JOIN psb ON users.username = psb.nama_pelanggan
+                LEFT JOIN pelanggan ON users.id_users = pelanggan.id_user
                 WHERE users.username = '$username' AND users.password = '$password'";
     $result_users = $conn->query($query_users);
 
     if ($result_users->num_rows > 0) {
         $data_login = $result_users->fetch_assoc();
         $_SESSION['id_users'] = $data_login['id_users'];
-        $_SESSION['id_karyawan'] = $data_login['id'];
-        $_SESSION['nip'] = $data_login['nip_karyawan'];
         $_SESSION['username'] = $data_login['username'];
-        $_SESSION['nama_karyawan'] = $data_login['nama_karyawan'];
-        $_SESSION['nama_pelanggan'] = $data_login['nama_pelanggan'];
         $_SESSION["peran"] = $data_login["peran"];
         if ($_SESSION["peran"] === "admin") {
+            $_SESSION['id_karyawan'] = $data_login['id'];
+            $_SESSION['nip'] = $data_login['nip_karyawan'];
+            $_SESSION['nama_karyawan'] = $data_login['nama_karyawan'];
             header("location: ./admin/index.php");
+            exit();
         } else if ($_SESSION["peran"] === "teknisi") {
+            $_SESSION['id_karyawan'] = $data_login['id'];
+            $_SESSION['nip'] = $data_login['nip_karyawan'];
+            $_SESSION['nama_karyawan'] = $data_login['nama_karyawan'];
             header("location: ./user/index.php");
+            exit();
         } else if ($_SESSION["peran"] === "pelanggan") {
+            $_SESSION['nama_pelanggan'] = $data_login['nama_pelanggan'];
             header("location: ./pelanggan/dashboard.php");
+            exit();
         } else {
             $notifikasi_login = "USERNAME ATAU PASSWORD SALAH!!!";
         }

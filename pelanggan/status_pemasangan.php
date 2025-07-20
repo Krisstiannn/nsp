@@ -11,8 +11,7 @@ include "/xampp/htdocs/nsp/services/koneksi.php";
 $id_user = $_SESSION['id_users'];
 $nama_pelanggan = $_SESSION['nama_pelanggan'];
 
-// Ambil data pelanggan
-$queryPelanggan = "SELECT * FROM psb WHERE id_user = '$id_user'";
+$queryPelanggan = "SELECT * FROM psb WHERE id_user = '$id_user' ORDER BY id DESC LIMIT 1";
 $resultPelanggan = $conn->query($queryPelanggan);
 if ($resultPelanggan->num_rows === 0) {
     $id_langganan = $paket = $teknisi = $status = '-';
@@ -21,7 +20,6 @@ if ($resultPelanggan->num_rows === 0) {
     $id_langganan = $dataPelanggan['id_langganan'];
     $paket = $dataPelanggan['paket_internet'];
 
-    // Ambil data teknisi dari tabel wo
     $id_pelanggan = $dataPelanggan['id'];
     $queryWO = "SELECT * FROM wo WHERE id_psb = '$id_pelanggan'";
     $resultWO = $conn->query($queryWO);
@@ -30,7 +28,6 @@ if ($resultPelanggan->num_rows === 0) {
         $dataWO = $resultWO->fetch_assoc();
         $id_teknisi = $dataWO['id_karyawan'];
 
-        // Ambil nama teknisi
         $queryTeknisi = "SELECT nama_karyawan FROM karyawan WHERE id = '$id_teknisi'";
         $resultTeknisi = $conn->query($queryTeknisi);
         $teknisi = $resultTeknisi->num_rows > 0 ? $resultTeknisi->fetch_assoc()['nama_karyawan'] : '-';
@@ -38,10 +35,9 @@ if ($resultPelanggan->num_rows === 0) {
         $teknisi = '-';
     }
 
-    // Ambil status dari report_pemasangan
     $queryReport = "SELECT status FROM report_pemasangan WHERE id_langganan = '$id_langganan'";
     $resultReport = $conn->query($queryReport);
-    $status = $resultReport->num_rows > 0 ? $resultReport->fetch_assoc()['status'] : 'On Going Progress';
+    $status = $resultReport->num_rows > 0 ? $resultReport->fetch_assoc()['status'] : 'Tiket Sudah Diberikan Ke Teknisi';
 }
 ?>
 <!DOCTYPE html>

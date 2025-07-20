@@ -4,10 +4,17 @@ session_start();
 
 $id_karyawan = $_SESSION['id_karyawan'] ?? null;
 
-$query = "SELECT perbaikan.nama_pelanggan, perbaikan.alamat, perbaikan.id_perbaikan, perbaikan.id_berlangganan, perbaikan.keluhan, perbaikan.no_telp, wo.id_karyawan
-            FROM perbaikan 
-            JOIN wo ON wo.id_perbaikan = perbaikan.id_perbaikan 
-            WHERE wo.id_karyawan = '$id_karyawan'";
+$query = "SELECT 
+            perbaikan.nama_pelanggan,
+            perbaikan.alamat, 
+            perbaikan.id_perbaikan, 
+            perbaikan.id_berlangganan, 
+            perbaikan.keluhan, 
+            perbaikan.no_telp, 
+            wo.id_karyawan
+          FROM perbaikan 
+          JOIN wo ON wo.id_perbaikan = perbaikan.id_perbaikan 
+          WHERE wo.id_karyawan = '$id_karyawan'";
 $result = $conn->query($query);
 ?>
 <!DOCTYPE html>
@@ -102,46 +109,60 @@ $result = $conn->query($query);
                                                 <?php foreach ($result as $pekerjaan) {
                                                     $id_pekerjaan = $pekerjaan['id_perbaikan'];
 
-                                                    // Ambil semua status pekerjaan berdasarkan no_wo
                                                     $query_status = "SELECT status FROM report_perbaikan WHERE no_wo = '$id_pekerjaan'";
                                                     $result_status = $conn->query($query_status);
 
                                                     $total = 0;
+                                                    $perjalanan = 0;
+                                                    $dilokasi = 0;
                                                     $selesai = 0;
                                                     $kendala = 0;
+                                                    $ogp = 0;
 
                                                     while ($row_status = $result_status->fetch_assoc()) {
                                                         $total++;
-                                                        if ($row_status['status'] === 'selesai') {
+                                                        if ($row_status['status'] === 'SELESAI') {
                                                             $selesai++;
-                                                        } elseif ($row_status['status'] === 'kendala') {
+                                                        } elseif ($row_status['status'] === 'KENDALA') {
                                                             $kendala++;
+                                                        } elseif ($row_status['status'] === 'DALAM PERJALANAN') {
+                                                            $perjalanan++;
+                                                        } elseif ($row_status['status'] === 'SAMPAI DILOKASI') {
+                                                            $dilokasi++;
+                                                        } elseif ($row_status['status'] === 'ON GOING PROGRES') {
+                                                            $ogp++;
                                                         }
                                                     }
 
-                                                    if ($kendala > 0) {
+                                                    if ($perjalanan > 0) {
+                                                        $status = '<span class="badge bg-info">SEDANG DALAM PERJALANAN</span>';
+                                                    } elseif ($dilokasi >0) {
+                                                        $status = '<span class="badge bg-primary">SAMPAI DILOKASI</span>';
+                                                    } elseif ($kendala > 0) {
                                                         $status = '<span class="badge bg-danger">KENDALA</span>';
+                                                    } elseif ($ogp > 0) {
+                                                        $status = '<span class="badge bg-warning">ON GOING PROGRES</span>';
                                                     } elseif ($total > 0 && $selesai === $total) {
                                                         $status = '<span class="badge bg-success">SELESAI</span>';
                                                     } else {
-                                                        $status = '<span class="badge bg-warning">ON GOING PROGRESS</span>';
+                                                        $status = '<span class="badge bg-secondary">TIKET DITERIMA</span>';
                                                     }
                                                 ?>
-                                                    <tr>
-                                                        <td><?= $pekerjaan['id_perbaikan'] ?></td>
-                                                        <td><?= $pekerjaan['id_berlangganan']?></td>
-                                                        <td><?= $pekerjaan['nama_pelanggan'] ?></td>
-                                                        <td><?= $pekerjaan['no_telp']?></td>
-                                                        <td><?= $pekerjaan['alamat'] ?></td>
-                                                        <td><?= $pekerjaan['keluhan']?></td>
-                                                        <td><?= $status ?></td>
-                                                        <td>
-                                                            <a class="btn btn-warning btn-sm"
-                                                                href="report-perbaikan.php?id=<?= $pekerjaan['id_perbaikan'] ?>">
-                                                                <i class="fas fa-pencil-alt"></i> Laporkan
-                                                            </a>
-                                                        </td>
-                                                    </tr>
+                                                <tr>
+                                                    <td><?= $pekerjaan['id_perbaikan'] ?></td>
+                                                    <td><?= $pekerjaan['id_berlangganan']?></td>
+                                                    <td><?= $pekerjaan['nama_pelanggan'] ?></td>
+                                                    <td><?= $pekerjaan['no_telp']?></td>
+                                                    <td><?= $pekerjaan['alamat'] ?></td>
+                                                    <td><?= $pekerjaan['keluhan']?></td>
+                                                    <td><?= $status ?></td>
+                                                    <td>
+                                                        <a class="btn btn-warning btn-sm"
+                                                            href="report-perbaikan.php?id=<?= $pekerjaan['id_perbaikan'] ?>">
+                                                            <i class="fas fa-pencil-alt"></i> Laporkan
+                                                        </a>
+                                                    </td>
+                                                </tr>
                                                 <?php } ?>
                                             </tbody>
                                         </table>

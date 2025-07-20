@@ -103,6 +103,7 @@ if (isset($_POST['btn_kirim'])) {
                                         <table class="table table-bordered text-center">
                                             <thead class="bg-gradient-cyan">
                                                 <tr>
+                                                    <th>ID Langganan</th>
                                                     <th>Nama Pelanggan</th>
                                                     <th>NO WA</th>
                                                     <th>Alamat atau Titik Kordinat</th>
@@ -116,6 +117,7 @@ if (isset($_POST['btn_kirim'])) {
                                             <tbody>
                                                 <?php foreach ($result_tampil as $psb) { ?>
                                                 <tr>
+                                                    <td><?= $psb['id_langganan']?></td>
                                                     <td><?= $psb['nama_pelanggan'] ?></td>
                                                     <td><?= $psb['wa_pelanggan'] ?></td>
                                                     <td><?= $psb['alamat_pelanggan'] ?></td>

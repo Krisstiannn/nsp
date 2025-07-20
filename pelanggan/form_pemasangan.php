@@ -159,8 +159,7 @@ if (isset($_POST['btn_submit'])) {
                                             <select class="custom-select" name="paket" required>
                                                 <option>-- Pilih --</option>
                                                 <option>Paket 3 Perangkat</option>
-                                                <option>Paket 5 Perangkat</option>
-                                                <option>Paket 8 Perangkat</option>
+                                                <option>Paket 6 Perangkat</option>
                                                 <option>Paket 12 Perangkat</option>
                                             </select>
                                         </div>

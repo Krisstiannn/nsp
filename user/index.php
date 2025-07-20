@@ -1,6 +1,6 @@
 <?php
-include "/xampp/htdocs/nsp/services/koneksi.php";
 session_start();
+include "/xampp/htdocs/nsp/services/koneksi.php";
 $id_karyawan = $_SESSION['id_karyawan'] ?? null;
 $query_jumlah = "SELECT COUNT(*) AS total_pekerjaan FROM wo WHERE id_karyawan = '$id_karyawan'";
 $result_tampilJumlah = $conn->query($query_jumlah)->fetch_assoc();
