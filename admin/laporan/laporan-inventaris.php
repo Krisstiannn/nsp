@@ -7,12 +7,9 @@ $start_date = date('Y-m-d', strtotime($_POST['start_date'] ?? date('d-m-Y')));
 $end_date = date('Y-m-d', strtotime($_POST['end_date'] ?? date('d-m-Y')));
 
 $query = "
-    SELECT kode_barang, nama_barang AS nama_barang, tanggal_masuk 
-    FROM inventaris 
-    WHERE tanggal_masuk BETWEEN '$start_date' AND '$end_date'
-    UNION ALL
-    SELECT kode_barang, nama_barang AS nama_barang, tanggal_masuk 
-    FROM material 
+    SELECT kode_barang, nama_barang, serial_number, tanggal_masuk, kondisi_barang,
+    TIMESTAMPDIFF(YEAR, tanggal_masuk, CURDATE()) AS usia_tahun
+    FROM inventaris
     WHERE tanggal_masuk BETWEEN '$start_date' AND '$end_date'
     ORDER BY tanggal_masuk ASC
 ";
@@ -25,11 +22,10 @@ if (isset($_POST['cetak'])) {
 
     $maxLogoHeight = 25;
     $maxLogoWidth = 50;
-    $scaleHeight = $maxLogoHeight / $logoHeight;
-    $scaleWidth = $maxLogoWidth / $logoWidth;
-    $scale = min($scaleHeight, $scaleWidth);
+    $scale = min($maxLogoHeight / $logoHeight, $maxLogoWidth / $logoWidth);
     $newLogoWidth = $logoWidth * $scale;
     $newLogoHeight = $logoHeight * $scale;
+
     $pdf = new FPDF('P', 'mm', 'A4');
     $pdf->AddPage();
     $pdf->Image($logoPath, 10, 10, $newLogoWidth, $newLogoHeight);
@@ -47,42 +43,45 @@ if (isset($_POST['cetak'])) {
     $pdf->Ln(5);
 
     $pdf->SetFont('Arial', 'B', 14);
-    $pdf->Cell(190, 10, 'Laporan Barang Masuk', 0, 1, 'C');
+    $pdf->Cell(190, 10, 'Laporan Evaluasi Inventaris Barang', 0, 1, 'C');
     $pdf->SetFont('Arial', 'I', 12);
     $pdf->Cell(190, 10, "Periode: $start_date - $end_date", 0, 1, 'C');
     $pdf->Ln(5);
 
     $pdf->SetFont('Arial', 'B', 10);
-    $pdf->Cell(50, 10, 'Kode Barang', 1, 0, 'C');
-    $pdf->Cell(80, 10, 'Nama Barang', 1, 0, 'C');
-    $pdf->Cell(60, 10, 'Tanggal Masuk', 1, 1, 'C');
-
+    $pdf->Cell(30, 10, 'Kode Barang', 1, 0, 'C');
+    $pdf->Cell(30, 10, 'Serial Number', 1, 0, 'C');
+    $pdf->Cell(35, 10, 'Nama Barang', 1, 0, 'C');
+    $pdf->Cell(30, 10, 'Tgl Masuk', 1, 0, 'C');
+    $pdf->Cell(30, 10, 'Kondisi', 1, 0, 'C');
+    $pdf->Cell(35, 10, 'Perlu Diganti?', 1, 1, 'C');
 
     $pdf->SetFont('Arial', '', 10);
-    while ($row = $result->fetch_assoc()) {
-        $pdf->Cell(50, 10, $row['kode_barang'], 1, 0, 'C');
-        $pdf->Cell(80, 10, $row['nama_barang'], 1, 0, 'C');
-        $pdf->Cell(60, 10, date('d-m-Y', strtotime($row['tanggal_masuk'])), 1, 1, 'C');
+    foreach ($result as $row) {
+        $perlu_diganti = ($row['kondisi_barang'] != 'Baik' || $row['usia_tahun'] > 3) ? 'YA' : 'TIDAK';
+
+        $pdf->Cell(30, 10, $row['kode_barang'], 1, 0, 'C');
+        $pdf->Cell(30, 10, $row['serial_number'], 1, 0, 'C');
+        $pdf->Cell(35, 10, $row['nama_barang'], 1, 0, 'C');
+        $pdf->Cell(30, 10, date('d-m-Y', strtotime($row['tanggal_masuk'])), 1, 0, 'C');
+        $pdf->Cell(30, 10, $row['kondisi_barang'], 1, 0, 'C');
+        $pdf->Cell(35, 10, $perlu_diganti, 1, 1, 'C');
     }
 
-
     $pdf->Ln(15);
-
     $pdf->SetFont('Arial', '', 12);
     $pdf->Cell(120);
     $pdf->Cell(70, 7, 'Banjarmasin, ' . date('d-m-Y'), 0, 1, 'C');
     $pdf->Ln(20);
-
     $pdf->Cell(120);
     $pdf->Cell(70, 7, '______________________', 0, 1, 'C');
     $pdf->Cell(120);
-    $pdf->Cell(70, 7, $_SESSION['nama_karyawan'], 0, 1, 'C');
-    $pdf->Cell(120);
-
-
+    $pdf->Cell(70, 7, $_SESSION['nama_karyawan'] ?? 'Petugas', 0, 1, 'C');
     $pdf->Output();
+    exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -103,22 +102,18 @@ if (isset($_POST['cetak'])) {
 
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
     <div class="wrapper">
-        <!-- Navbar -->
+
         <?php include "/xampp/htdocs/nsp/layouts/header.php" ?>
-        <!-- Navbar -->
 
-        <!-- Main Sidebar Container -->
         <?php include "/xampp/htdocs/nsp/layouts/sidebar.php" ?>
-        <!-- END Main Sidebar -->
 
-        <!-- Main Content -->
         <div class="content-wrapper bg-gradient-white">
 
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1>Data Inventaris</h1>
+                            <h1>Laporan Evaluasi Inventaris Barang</h1>
                         </div>
                     </div>
                 </div>
@@ -128,12 +123,6 @@ if (isset($_POST['cetak'])) {
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-12">
-                            <div class="row">
-                                <div class="col-md-6">
-                                </div>
-                                <div class="col-md-6">
-                                </div>
-                            </div>
                             <div class="card">
                                 <div class="card-header border-transparent">
                                     <div class="card-header">
@@ -168,19 +157,29 @@ if (isset($_POST['cetak'])) {
                                             <thead class="bg-gradient-cyan">
                                                 <tr>
                                                     <th>Kode Barang</th>
+                                                    <th>Serial Number</th>
                                                     <th>Nama Barang</th>
-                                                    <th>Tanggal Masuk Barang</th>
+                                                    <th>Tanggal Masuk</th>
+                                                    <th>Kondisi</th>
+                                                    <th>Perlu Diganti?</th>
                                                 </tr>
                                             </thead>
-                                            <?php foreach ($result as $laporan) { ?>
-                                                <tbody>
-                                                    <tr>
-                                                        <td><?= $laporan['kode_barang'] ?></td>
-                                                        <td><?= $laporan['nama_barang'] ?></td>>
-                                                        <td><?= date('d-m-Y', strtotime($laporan['tanggal_masuk'])) ?></td>
-                                                    </tr>
-                                                </tbody>
+
+                                            <?php foreach ($result as $laporan) {
+                                                $perlu_diganti = ($laporan['kondisi_barang'] != 'Baik' || $laporan['usia_tahun'] > 3) ? 'YA' : 'TIDAK';
+                                            ?>
+                                            <tbody>
+                                                <tr>
+                                                    <td><?= $laporan['kode_barang'] ?></td>
+                                                    <td><?= $laporan['serial_number'] ?></td>
+                                                    <td><?= $laporan['nama_barang'] ?></td>
+                                                    <td><?= date('d-m-Y', strtotime($laporan['tanggal_masuk'])) ?></td>
+                                                    <td><?= $laporan['kondisi_barang'] ?></td>
+                                                    <td><?= $perlu_diganti ?></td>
+                                                </tr>
+                                            </tbody>
                                             <?php } ?>
+
                                         </table>
                                     </div>
                                 </div>
@@ -191,11 +190,7 @@ if (isset($_POST['cetak'])) {
                 </div>
             </section>
         </div>
-        <!-- END Main Content -->
-
-        <!-- Main Footer -->
         <?php include "/xampp/htdocs/nsp/layouts/footer.php" ?>
-        <!-- End Footer -->
     </div>
 
     <script src="/nsp/plugins/jquery/jquery.min.js"></script>

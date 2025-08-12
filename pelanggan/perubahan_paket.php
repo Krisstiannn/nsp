@@ -1,5 +1,35 @@
 <?php
+session_start();
 include "/xampp/htdocs/nsp/services/koneksi.php";
+
+$id = $_SESSION['id_users'];
+$data_pelanggan = "SELECT * FROM pelanggan WHERE id_user = '$id'";
+$hasil = $conn->query($data_pelanggan)->fetch_assoc();
+
+if(isset($_POST['btn_submit'])) {
+    $nama = $_POST['nama_pelanggan'];
+    $id_langganan = $_POST['id_langganan'];
+    $paket = $_POST['paket'];
+
+    $insertRequest = "INSERT INTO request (id_request, nama_pelanggan, id_pelanggan, jenis_request, status) VALUES ('', '$nama', '$id_langganan', 'UP DOWN PAKET', 'PROSES')";
+    $hasilRequest = $conn->query($insertRequest);
+
+    $insertUpDown = "INSERT INTO updown_paket (id, id_pelanggan, paket_terbaru) VALUES ('', '$id_langganan', '$paket')";
+    $hasilUpDown = $conn->query($insertUpDown);
+
+    if ($hasilRequest && $hasilUpDown) {
+        echo "<script type= 'text/javascript'>
+                    alert('Data Berhasil disimpan!');
+                    document.location.href = 'status_request.php';
+                </script>";
+        } else {
+            echo "<script type= 'text/javascript'>
+                alert('Data Gagal disimpan!');
+                document.location.href = 'perubahan_paket.php';
+            </script>";
+        }    
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,31 +72,32 @@ include "/xampp/htdocs/nsp/services/koneksi.php";
                                         <div class="card-header">
                                             <h3 class="card-title">Upgrade Atau Downgrade Paket Internet</h3>
                                         </div>
-                                        <form action="tambah-akun.php" method="POST">
+                                        <form action="" method="POST">
                                             <div class="card-body">
                                                 <div class="form-group">
                                                     <label for="id_langganan">ID Berlangganan</label>
+                                                    <input type="hidden" class="form-control" name="id_langganan" value="<?= $hasil['id_langganan']?>">
                                                     <input type="text" class="form-control" name="id_langganan"
-                                                        placeholder="ID Berlangganan">
+                                                        placeholder="ID Berlangganan" value="<?= $hasil['id_langganan']?>" disabled>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="nama_pelanggan">Nama Pelanggan</label>
+                                                    <input type="hidden" name="nama_pelanggan" class="form-control" value="<?= $hasil['nama_pelanggan']?>">
                                                     <input type="text" class="form-control" name="nama_pelanggan"
-                                                        placeholder="Nama Pelanggan">
+                                                        placeholder="Nama Pelanggan" value="<?= $hasil['nama_pelanggan']?>" disabled>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="Paket">Paket Semula</label>
                                                     <input type="text" class="form-control" name="paket_semula"
-                                                        placeholder="Paket Semula">
+                                                        placeholder="Paket Semula" value="<?= $hasil['jenis_layanan']?>" disabled>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="paket">Paket</label>
                                                     <select class="custom-select" name="paket">
                                                         <option>-- Pilih --</option>
-                                                        <option>3 Mbps</option>
-                                                        <option>5 Mbps</option>
-                                                        <option>8 Mbps</option>
-                                                        <option>10 Mbps</option>
+                                                        <option>Paket 3 Perangkat</option>
+                                                        <option>Paket 6 Perangkat</option>
+                                                        <option>Paket 12 Perangkat</option>
                                                     </select>
                                                 </div> 
                                             </div>

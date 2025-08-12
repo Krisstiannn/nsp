@@ -1,34 +1,69 @@
 <?php
 include "/xampp/htdocs/nsp/services/koneksi.php";
+$data_pelanggan = $conn->query("SELECT * FROM pelanggan")->fetch_assoc();
+$id_langganan = $data_pelanggan['id_langganan'];
 
-// $query_tampil = "SELECT * FROM psb";
-// $result_tampil = $conn->query($query_tampil);
-// $query_tampilKaryawan = "SELECT * FROM karyawan";
-// $result_tampilkaryawan = $conn->query($query_tampilKaryawan);
+$ambil = "SELECT * FROM request";
+$hasil_data = $conn->query($ambil);
 
-// if (isset($_POST['btn_kirim'])) {
-//     $id_pekerjaan = $_POST['id_pekerjaan'];
-//     $id_karyawan = $_POST['id_karyawan'];
+if(isset($_POST['setuju']) || isset($_POST['tolak'])) {
+    $id_request = $_POST['id_request'];
+    $id_pelanggan = $_POST['id_pelanggan'];
+    $aksi = isset($_POST['setuju']) ? 'setuju' : 'tolak';
+    
+    $data_request = $conn->query("SELECT * FROM request WHERE id_pelanggan = '$id_pelanggan' AND id_request = '$id_request'")->fetch_assoc();
+    if ($data_request) {
+        if($aksi == 'setuju') {
+            if($data_request['jenis_request'] == 'GANTI ID LOGIN') {
+                $login_pelanggan = $conn->query("SELECT * FROM idLogin WHERE id_langganan = '{$data_request['id_pelanggan']}' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+                if($login_pelanggan) {
+                    $username = $login_pelanggan['username'];
+                    $password = $login_pelanggan['password'];
 
+                    $update_login = "UPDATE pelanggan SET username = '$username', password = '$password' WHERE id_langganan = '{$data_request['id_pelanggan']}'";
+                    $update = $conn->query($update_login);
 
-//     $cek_karyawan = $conn->query("SELECT * FROM karyawan WHERE id = '$id_karyawan'");
-//     $cek_pekerjaan = $conn->query("SELECT * FROM psb WHERE id = '$id_pekerjaan'");
-//     $cek = $conn->query("SELECT * FROM wo WHERE id_pekerjaan = '$id_pekerjaan'")->fetch_assoc();
+                    if($update) {
+                        echo "<script type= 'text/javascript'>
+                                alert('ID Login Berhasi Diupdate!');
+                                document.location.href = 'request.php';
+                            </script>";
+                    } else {
+                        echo "<script type= 'text/javascript'>
+                                alert('ID Login Gagal Diupdate!');
+                                document.location.href = 'request.php';
+                            </script>";
+                    }   
+                }
+            } elseif ($data_request['jenis_request'] == 'UP DOWN PAKET') {
+                $paket_pelanggan = $conn->query("SELECT * FROM updown_paket WHERE id_pelanggan = '{$data_request['id_pelanggan']}' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+                if($paket_pelanggan) {
+                    $paket_terbaru = $paket_pelanggan['paket_terbaru'];
 
-//     if ($cek > 0) {
-//         echo "<script>alert('Pekerjaan Sudah Di Kirimkan Ke Karyawan!'); window.location.href='psb.php';</script>";
-//         die();
-//     } else if ($cek_karyawan->num_rows > 0 && $cek_pekerjaan->num_rows > 0) {
-//         $query_insert = "INSERT INTO wo (id_karyawan, id_pekerjaan) VALUES ('$id_karyawan', '$id_pekerjaan')";
-//         if ($conn->query($query_insert)) {
-//             echo "<script>alert('Pekerjaan berhasil dikirim ke karyawan!'); window.location.href='psb.php';</script>";
-//         } else {
-//             echo "<script>alert('Gagal mengirim pekerjaan!'); window.history.back();</script>";
-//         }
-//     } else {
-//         echo "<script>alert('Data tidak valid!'); window.history.back();</script>";
-//     }
-// }
+                    $update_paket = "UPDATE pelanggan SET jenis_layanan = '$paket_terbaru' WHERE id_langganan = '{$data_request['id_pelanggan']}'";
+                    $update = $conn->query($update_paket);
+
+                    if($update) {
+                        echo "<script type= 'text/javascript'>
+                                alert('Paket Layanan Pelanggan Berhasi Diupdate!');
+                                document.location.href = 'request.php';
+                            </script>";
+                    } else {
+                        echo "<script type= 'text/javascript'>
+                                alert('Paket Layanan Pelanggan Gagal Diupdate!');
+                                document.location.href = 'request.php';
+                            </script>";
+                    }
+                }
+            }
+            $conn->query("UPDATE request SET status = 'DITERIMA' WHERE id_request = '$id_request' AND id_pelanggan = '$id_pelanggan'");
+        } else if ($aksi == 'tolak') {
+            $conn->query("UPDATE request SET status = 'DITOLAK' WHERE id_request = '$id_request' AND id_pelanggan = '$id_pelanggan'");
+            echo "<script>alert('Request Ditolak.'); window.location.href='request.php';</script>";
+        }
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -113,12 +148,75 @@ include "/xampp/htdocs/nsp/services/koneksi.php";
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <td>Kristian</td>
-                                                <td>161201225975</td>
-                                                <td>Pergantian Password</td>
-                                                <td>12345</td>
-                                                <td>ACC/Tidak</td>
-                                                <td>Selesai/Tidak/Proses</td>
+                                                <?php while ($row_data = $hasil_data->fetch_assoc()) : ?>
+                                                <tr>
+                                                    <td><?= htmlspecialchars($row_data['nama_pelanggan'])?></td>
+                                                    <td><?= htmlspecialchars($row_data['id_pelanggan']) ?></td>
+                                                    <td><?= htmlspecialchars($row_data['jenis_request']) ?></td>
+                                                    <td>
+                                                        <?php if ($row_data['jenis_request'] == 'GANTI ID LOGIN'): ?>
+                                                        <?php
+                                                            $dataLogin = $conn->query("SELECT * FROM idLogin WHERE id_langganan = '{$row_data['id_pelanggan']}' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+                                                            if ($dataLogin):
+                                                        ?>
+                                                        USERNAME DAN PASSWORD TERBARU : <br>
+                                                        Username = <?= htmlspecialchars($dataLogin['username']) ?><br>
+                                                        Password = <?= htmlspecialchars($dataLogin['password']) ?>
+                                                        <?php else: ?>
+                                                        Data belum tersedia.
+                                                        <?php endif; ?>
+                                                        <?php elseif ($row_data['jenis_request'] == 'UP DOWN PAKET'): ?>
+                                                        <?php
+                                                            $dataPaket = $conn->query("SELECT * FROM updown_paket WHERE id_pelanggan = '{$row_data['id_pelanggan']}' ORDER BY id DESC LIMIT 1")->fetch_assoc();
+                                                            if ($dataPaket):
+                                                        ?>
+                                                        Paket Terbaru =
+                                                        <?= htmlspecialchars($dataPaket['paket_terbaru']) ?>
+                                                        <?php else: ?>
+                                                        Data belum tersedia.
+                                                        <?php endif; ?>
+                                                        <?php else: ?>
+                                                        <?= htmlspecialchars($row_data['isi_request']) ?>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td>
+                                                        <form action="" method="POST" style="display: inline-block;">
+                                                            <input type="hidden" name="id_pelanggan"
+                                                                value="<?= $row_data['id_pelanggan']?>">
+                                                            <input type="hidden" name="id_request"
+                                                                value="<?= $row_data['id_request']?>">
+                                                            <button type="submit" name="setuju"
+                                                                class="btn btn-success btn-sm">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form action="" method="POST" style="display: inline-block;">
+                                                            <input type="hidden" name="id_pelanggan"
+                                                                value="<?= $row_data['id_pelanggan']?>">
+                                                            <input type="hidden" name="id_request"
+                                                                value="<?= $row_data['id_request']?>">
+                                                            <button type="submit" name="tolak"
+                                                                class="btn btn-danger btn-sm">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                    <?php
+                                                        $data = $conn->query("SELECT status FROM request WHERE id_request = '{$row_data['id_request']}' AND id_pelanggan = '{$row_data['id_pelanggan']}'")->fetch_assoc();
+                                                        $status = "";
+                                                        if($data['status'] == 'DITERIMA') {
+                                                            $status = '<span class="badge badge-success">SETUJU</span>';
+                                                        } elseif($data['status'] == 'DITOLAK') {
+                                                            $status = '<span class="badge badge-danger">DI TOLAK</span>';
+                                                        } else {
+                                                            $status = '<span class="badge badge-warning">PROSES</span>';
+                                                        }
+
+                                                    ?>
+                                                    <td><?= $status?></td>
+                                                </tr>
+                                                <?php endwhile; ?>
+
                                             </tbody>
                                         </table>
                                     </div>

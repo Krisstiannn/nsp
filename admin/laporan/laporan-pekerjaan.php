@@ -1,7 +1,20 @@
 <?php
 include "/xampp/htdocs/nsp/services/koneksi.php";
 session_start();
-$query_tampil = "SELECT * FROM report_pemasangan";
+$query_tampil = "SELECT
+                    p.nama_pelanggan,
+                    p.alamat_pelanggan,
+                    rp.no_wo,
+                    rp.status,
+                    rp.keterangan,
+                    rp.material1,
+                    rp.material2,
+                    rp.material3,
+                    rp.jumlah1,
+                    rp.jumlah2,
+                    rp.jumlah3
+                 FROM report_pemasangan rp
+                 LEFT JOIN psb p ON p.id = rp.no_wo";
 $result_tampil = $conn->query($query_tampil);
 
 if (isset($_POST{
@@ -57,11 +70,11 @@ if (isset($_POST{
         $pdf->Cell(50, 10, $report['alamat_pelanggan'], 1, 0, 'C');
         $pdf->Cell(30, 10, $report['status'], 1, 0, 'C');
         $pdf->Cell(40, 10, $report['keterangan'], 1, 0, 'C');
-        $pdf->Cell(25, 10, $report['barang1'], 1, 0, 'C');
+        $pdf->Cell(25, 10, $report['material1'], 1, 0, 'C');
         $pdf->Cell(15, 10, $report['jumlah1'], 1, 0, 'C');
-        $pdf->Cell(25, 10, $report['barang2'], 1, 0, 'C');
+        $pdf->Cell(25, 10, $report['material2'], 1, 0, 'C');
         $pdf->Cell(15, 10, $report['jumlah2'], 1, 0, 'C');
-        $pdf->Cell(25, 10, $report['barang3'], 1, 0, 'C');
+        $pdf->Cell(25, 10, $report['material3'], 1, 0, 'C');
         $pdf->Cell(15, 10, $report['jumlah3'], 1, 1, 'C');
     }
     $pdf->Ln(15);

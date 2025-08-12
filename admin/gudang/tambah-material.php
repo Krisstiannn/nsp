@@ -1,27 +1,40 @@
 <?php
 include "/xampp/htdocs/nsp/services/koneksi.php";
 
+$data_kode = mysqli_query($conn, "SELECT MAX(kode_barang) AS max_code FROM material");
+$data = mysqli_fetch_assoc($data_kode);
+$kode_terakhir = $data['max_code'];
+
+if($kode_terakhir) {
+    $urutan = (int) substr($kode_terakhir, 3);
+    $urutan++;
+} else {
+    $urutan = 2001;
+}
+
+$kode_barang = "NSP".$urutan;
+
 if (isset($_POST['btn_submit'])) {
-    $kode_barang = $_POST['kode_barang'];
+    // $kode_barang = $_POST['kode_barang'];
     $gambar_barang = $_FILES['gambar_barang']['name'];
     $nama_barang = $_POST['nama_barang'];
     $jumlah_awal = $_POST['jumlah_awal'];
-    $jumlah_sisa = $_POST['jumlah_sisa'];
+    // $jumlah_sisa = $_POST['jumlah_sisa'];
     $tanggal_masuk = $_POST['tanggal_masuk'];
 
     $dir_foto = "/xampp/htdocs/nsp/storage/img/";
     $tmp_file = $_FILES['gambar_barang']['tmp_name'];
     move_uploaded_file($tmp_file, $dir_foto . $gambar_barang);
 
-    if (empty($kode_barang) || empty($gambar_barang) || empty($nama_barang)) {
+    if (empty($gambar_barang) || empty($nama_barang)) {
         echo "<script type= 'text/javascript'>
                 alert('Tolong isi data dengan benar!');
                 document.location.href = 'tambah-material.php';
             </script>";
         die();
     } else {
-        $query_tambahData = "INSERT INTO material (id, kode_barang, gambar_barang, nama_barang, jumlah_awal, jumlah_sisa, tanggal_masuk) 
-        VALUES ('','$kode_barang', '$gambar_barang', '$nama_barang', '$jumlah_awal', '$jumlah_sisa', '$tanggal_masuk')";
+        $query_tambahData = "INSERT INTO material (id, kode_barang, gambar_barang, nama_barang, jumlah_awal, tanggal_masuk) 
+        VALUES ('','$kode_barang', '$gambar_barang', '$nama_barang', '$jumlah_awal',  '$tanggal_masuk')";
         $result_tambahData = $conn->query($query_tambahData);
 
         if ($result_tambahData) {
@@ -29,6 +42,7 @@ if (isset($_POST['btn_submit'])) {
                 alert('Data Berhasil disimpan!');
                 document.location.href = 'material.php';
             </script>";
+            die();
         } else {
             echo "<script type= 'text/javascript'>
                 alert('Data Gagal disimpan!');
@@ -89,8 +103,9 @@ if (isset($_POST['btn_submit'])) {
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="kode">Kode Barang</label>
+                                    <input type="text" class="form-control" name="kode_barang" value="<?= $kode_barang?>" hidden>
                                     <input type="text" class="form-control" name="kode_barang"
-                                        placeholder="Kode Barang">
+                                        placeholder="Kode Barang" value="<?= $kode_barang?>" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label for="gambar">Gambar Barang</label>

@@ -3,22 +3,26 @@ include "/xampp/htdocs/nsp/services/koneksi.php";
 include "/xampp/htdocs/nsp/library/fpdf.php";
 session_start();
 $keterangan = "";
-$query = "SELECT karyawan.nip_karyawan, karyawan.nama_karyawan, 
-            COUNT(report.id) AS jumlah_pekerjaan
-            FROM karyawan
-            LEFT JOIN wo ON karyawan.id = wo.id_karyawan
-            LEFT JOIN report ON wo.id_pekerjaan = report.id
-            GROUP BY karyawan.id;";
+$query = "SELECT 
+        k.nip_karyawan,
+        k.nama_karyawan,
+        COUNT(*) AS jumlah_pekerjaan
+    FROM karyawan k
+    LEFT JOIN wo ON k.id = wo.id_karyawan
+    LEFT JOIN report_pemasangan rp ON wo.id_psb = rp.id
+    LEFT JOIN report_perbaikan rb ON wo.id_perbaikan = rb.no_wo
+    WHERE k.posisi_karyawan = 'teknisi'
+    GROUP BY k.id";
 $jumlah = $conn->query($query)->fetch_assoc();
 $result = $conn->query($query);
 
-if ($jumlah['jumlah_pekerjaan'] >= '20') {
-    $keterangan = "GOOD PERFORM";
-} else if ($jumlah['jumlah_pekerjaan'] == '10') {
-    $keterangan = "STABIL";
-} else {
-    $keterangan = "BAD PERFORM";
-}
+// if ($jumlah['jumlah_pekerjaan'] >= '20') {
+//     $keterangan = "GOOD PERFORM";
+// } else if ($jumlah['jumlah_pekerjaan'] == '10') {
+//     $keterangan = "STABIL";
+// } else {
+//     $keterangan = "BAD PERFORM";
+// }
 
 if (isset($_POST['cetak'])) {
 
@@ -62,15 +66,31 @@ if (isset($_POST['cetak'])) {
     $pdf->Cell(40, 10, 'Keterangan', 1, 1, 'C');
 
 
-
-    $pdf->SetFont('Arial', '', 10);
     while ($row = $result->fetch_assoc()) {
-        $pdf->Cell(40, 10, $row['nip_karyawan'], 1, 0, 'C');
-        $pdf->Cell(60, 10, $row['nama_karyawan'], 1, 0, 'C');
-        $pdf->Cell(50, 10, $row['jumlah_pekerjaan'], 1, 0, 'C');
-        $pdf->Cell(40, 10, $keterangan, 1, 1, 'C');
+    $jumlah = $row['jumlah_pekerjaan'];
+    
+    if ($jumlah >= 20) {
+        $keterangan = "GOOD PERFORM";
+    } elseif ($jumlah >= 10) {
+        $keterangan = "STABIL";
+    } else {
+        $keterangan = "BAD PERFORM";
     }
 
+    $pdf->SetFont('Arial', '', 10);
+    if (isset($_POST['cetak'])) {
+        $pdf->Cell(40, 10, $row['nip_karyawan'], 1, 0, 'C');
+        $pdf->Cell(60, 10, $row['nama_karyawan'], 1, 0, 'C');
+        $pdf->Cell(50, 10, $jumlah, 1, 0, 'C');
+        $pdf->Cell(40, 10, $keterangan, 1, 1, 'C');
+    }
+    // while ($row = $result->fetch_assoc()) {
+    //     $pdf->Cell(40, 10, $row['nip_karyawan'], 1, 0, 'C');
+    //     $pdf->Cell(60, 10, $row['nama_karyawan'], 1, 0, 'C');
+    //     $pdf->Cell(50, 10, $row['jumlah_pekerjaan'], 1, 0, 'C');
+    //     $pdf->Cell(40, 10, $keterangan, 1, 1, 'C');
+    // }
+    }
 
     $pdf->Ln(15);
 
@@ -122,7 +142,7 @@ if (isset($_POST['cetak'])) {
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1>Laporan Performa Karyawan</h1>
+                            <h1>Laporan Performa Teknisi</h1>
                         </div>
                     </div>
                 </div>
@@ -175,10 +195,20 @@ if (isset($_POST['cetak'])) {
                                             </thead>
                                             <tbody>
                                                 <?php while ($row = $result->fetch_assoc()): ?>
+                                                    <?php
+                                                        $jumlah = $row['jumlah_pekerjaan'];
+                                                        if ($jumlah >= 20) {
+                                                            $keterangan = "GOOD PERFORM";
+                                                        } elseif ($jumlah >= 10) {
+                                                            $keterangan = "STABIL";
+                                                        } else {
+                                                            $keterangan = "BAD PERFORM";
+                                                        }
+                                                    ?>
                                                     <tr>
                                                         <td><?= $row['nip_karyawan'] ?></td>
                                                         <td><?= $row['nama_karyawan'] ?></td>
-                                                        <td><?= $row['jumlah_pekerjaan'] ?></td>
+                                                        <td><?= $jumlah ?></td>
                                                         <td><?= $keterangan ?></td>
                                                     </tr>
                                                 <?php endwhile; ?>

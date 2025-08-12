@@ -2,7 +2,7 @@
 session_start();
 include "/xampp/htdocs/nsp/services/koneksi.php";
 $id_langganan = "";
-$tanggal = date('d-m-Y');
+$tanggal = date('Y-m-d');
 $id_user = $_SESSION['id_users'] ?? null;
 
 $cekLangganan = $conn->query("SELECT id_langganan FROM pelanggan WHERE id_user = '$id_user'");
@@ -51,8 +51,8 @@ if (isset($_POST['btn_submit'])) {
             </script>";
         die();
     } else {
-        $query_tambahData = "INSERT INTO psb (id, id_langganan, nama_pelanggan, wa_pelanggan, alamat_pelanggan, rumah_pelanggan, ktp_pelanggan, paket_internet, id_user)
-                             VALUES ('', '$id_langganan', '$nama_pelanggan', '$wa_pelanggan', '$alamat','$foto_rumah', '$foto_ktp', '$paket', '$id_user')";
+        $query_tambahData = "INSERT INTO psb (id, id_langganan, nama_pelanggan, wa_pelanggan, alamat_pelanggan, rumah_pelanggan, ktp_pelanggan, paket_internet, id_user, tanggal_daftar)
+                             VALUES ('', '$id_langganan', '$nama_pelanggan', '$wa_pelanggan', '$alamat','$foto_rumah', '$foto_ktp', '$paket', '$id_user', '$tanggal')";
         $result_tambahData = $conn->query($query_tambahData);
 
         if ($result_tambahData) {

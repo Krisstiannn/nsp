@@ -128,10 +128,11 @@ $result_tampilData = $conn->query($query_tampilData);
                                                     <th>Serial Number</th>
                                                     <th>Gambar Barang</th>
                                                     <th>Nama Barang</th>
+                                                    <th>Merk Barang</th>
                                                     <th>Spesifikasi</th>
                                                     <th>Jenis Barang</th>
                                                     <th>Kondisi Barang</th>
-                                                    <th>Jumlah Barang</th>
+                                                    <!-- <th>Jumlah Barang</th> -->
                                                     <th>Tanggal Masuk Barang</th>
                                                     <th>Action</th>
                                                 </tr>
@@ -147,10 +148,11 @@ $result_tampilData = $conn->query($query_tampilData);
                                                                 style="width: 100px;">
                                                         </td>
                                                         <td><?= $inventaris['nama_barang'] ?></td>
-                                                        <td>Spesifikasi</td>
-                                                        <td>Jenis Barang</td>
+                                                        <td><?= $inventaris['merk_barang'] ?></td>
+                                                        <td><?= $inventaris['spesifikasi'] ?></td>
+                                                        <td><?= $inventaris['jenis_barang'] ?></td>
                                                         <td><?= $inventaris['kondisi_barang'] ?></td>
-                                                        <td><?= $inventaris['jumlah_barang'] ?></td>
+                                                        <!-- <td><?= $inventaris['jumlah_barang'] ?></td> -->
                                                         <td><?= date('d-m-Y', strtotime($inventaris['tanggal_masuk'])) ?>
                                                         </td>
                                                         <td>

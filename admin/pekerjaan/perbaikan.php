@@ -79,10 +79,10 @@ if (isset($_POST['btn_kirim'])) {
                             <div class="card">
                                 <div class="card-header border-transparent">
                                     <div class="card-header">
-                                        <div class="card-title">
+                                        <!-- <div class="card-title">
                                             <a href="tambah-perbaikan.php" class="btn btn-sm btn-success ">Tambah
                                                 Data</a>
-                                        </div>
+                                        </div> -->
 
                                         <div class="card-title float-right">
                                             <div class="input-group input-group-sm" style="width: 150px;">
@@ -109,7 +109,7 @@ if (isset($_POST['btn_kirim'])) {
                                                     <th>Alamat atau Titik Kordinat</th>
                                                     <th>Keluhan</th>
                                                     <th>Teknisi Yang Mengerjakan</th>
-                                                    <th>Action</th>
+                                                    <!-- <th>Action</th> -->
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -134,7 +134,7 @@ if (isset($_POST['btn_kirim'])) {
                                                                     class="btn btn-warning btn-sm">Kirim</button>
                                                         </form>
                                                     </td>
-                                                    <td>
+                                                    <!-- <td>
                                                         <a class="btn btn-info btn-sm" href="edit-perbaikan.php?id=<?= $perbaikan['id_perbaikan']?>">
                                                             <i class="fas fa-pencil-alt">
                                                             </i>
@@ -145,7 +145,7 @@ if (isset($_POST['btn_kirim'])) {
                                                             </i>
                                                             Delete
                                                         </a>
-                                                    </td>
+                                                    </td> -->
                                                 </tr>
                                                 <?php }?>
                                             </tbody>

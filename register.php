@@ -6,6 +6,7 @@ if (isset($_POST['btn_register'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
     $re_type = $_POST['re_type'];
+    
 
     if ($password !== $re_type) {
         $notifikasi = "PASSWORD TIDAK SAMA";
@@ -59,7 +60,7 @@ if (isset($_POST['btn_register'])) {
 
                 <form action="register.php" method="POST">
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="Email" name="email" required>
+                        <input type="email" class="form-control" placeholder="Email" name="email" required>
                     </div>
                     <div class="input-group mb-3">
                         <input type="password" class="form-control" placeholder="Password" name="password" required>

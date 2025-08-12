@@ -4,6 +4,20 @@ include "/xampp/htdocs/nsp/services/koneksi.php";
 
 $id_user = $_SESSION['id_users'];
 $nama_pelanggan = $_SESSION['nama_pelanggan'];
+$idLang = $_SESSION['id_langganan'];
+
+$q = $conn->prepare("
+  SELECT id_pembayaran, id_langganan, bulan_tagihan, jumlah_tagihan, status_pembayaran
+  FROM pembayaran
+  WHERE id_langganan=? AND status_pembayaran = 'BELUM BAYAR'
+  ORDER BY bulan_tagihan DESC
+");
+$q->bind_param("s", $idLang);
+$q->execute();
+$r = $q->get_result();
+
+$namaBulan = [ '01'=>'JANUARI','02'=>'FEBRUARI','03'=>'MARET','04'=>'APRIL','05'=>'MEI','06'=>'JUNI',
+               '07'=>'JULI','08'=>'AGUSTUS','09'=>'SEPTEMBER','10'=>'OKTOBER','11'=>'NOVEMBER','12'=>'DESEMBER' ];
 ?>
 
 <!DOCTYPE html>
@@ -25,43 +39,45 @@ $nama_pelanggan = $_SESSION['nama_pelanggan'];
             <div class="content">
                 <div class="container">
                     <section class="content-header">
-                        <h1 class="m-0">History Pembayaran</h1>
+                        <h1 class="m-0">Portal Pembayaran</h1>
                     </section>
 
                     <section class="content">
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">History Tagihan Bulanan</h3>
+                                <h3 class="card-title"></h3>
                             </div>
                             <div class="card-body">
-                                <table class="table table-bordered table-striped">
+                                <table class="table table-bordered text-center">
                                     <thead>
                                         <tr>
-                                            <th>Tanggal Pembayaran</th>
                                             <th>ID Langganan</th>
-                                            <th>Nama Pelanggan</th>
-                                            <th>Jenis Layanan</th>
+                                            <th>Pembayaran Bulan -</th>
                                             <th>Tagihan Bulanan</th>
                                             <th>Status</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        <?php while($row = $r->fetch_assoc()):
+                                            $ymd = $row['bulan_tagihan']; // YYYY-MM-01
+                                            $m   = date('m', strtotime($ymd));
+                                            $blnText = $namaBulan[$m] ?? $ymd;
+                                            $paid = ($row['status_pembayaran']==='SUDAH BAYAR');
+                                        ?>
                                         <tr>
-                                            <td>07 - 06 - 2025</td>
-                                            <td>212907250819</td>
-                                            <td>Nisaa</td>
-                                            <td>Paket 12 Perangkat</td>
-                                            <td>Rp. 275.000</td>
-                                            <td style ="color: green;">SUDAH BAYAR</td>
+                                            <td><?= htmlspecialchars($row['id_langganan']) ?></td>
+                                            <td><?= $blnText ?></td>
+                                            <td>Rp. <?= number_format((int)$row['jumlah_tagihan'],0,',','.') ?></td>
+                                            <td style="font-weight:bold; color:<?= $paid?'green':'red' ?>;">
+                                                <?= $paid ? 'SUDAH BAYAR' : 'BELUM BAYAR' ?>
+                                            </td>
+                                            <td>
+                                                <a class="btn btn-success btn-sm"
+                                                    href="pembayaran.php?id=<?= (int)$row['id_pembayaran'] ?>">DETAIL</a>
+                                            </td>
                                         </tr>
-                                        <tr>
-                                            <td>07 - 07 - 2025</td>
-                                            <td>212907250819</td>
-                                            <td>Nisaa</td>
-                                            <td>Paket 12 Perangkat</td>
-                                            <td>Rp. 275.000</td>
-                                            <td style ="color: green;">SUDAH BAYAR</td>
-                                        </tr>
+                                        <?php endwhile; ?>
                                     </tbody>
                                 </table>
                             </div>

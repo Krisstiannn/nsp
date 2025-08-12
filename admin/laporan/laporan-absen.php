@@ -152,14 +152,14 @@ if (isset($_POST['cetak'])) {
                             <div class="card">
                                 <div class="card-header border-transparent">
                                     <div class="card-header">
-                                        <form action="" method="POST">
-                                            <div class="card-title">
-
-                                                <label for="bulan">Pilih Bulan:</label>
-                                                <input type="month" name="bulan" required>
-                                                <button name="cetak" class="btn btn-sm btn-success ">Cetak</button>
-                                            </div>
+                                        <form action="" method="POST" class="form-inline">
+                                            <label for="bulan" class="mr-2">Pilih Bulan:</label>
+                                            <input type="month" id="bulan" name="bulan" required
+                                                    value="<?= htmlspecialchars($bulan) ?>" class="form-control mr-2">
+                                            <button type="submit" name="tampil" class="btn btn-sm btn-primary mr-2">Tampilkan</button>
+                                            <button type="submit" name="cetak" class="btn btn-sm btn-success">Cetak</button>
                                         </form>
+
 
                                         <div class="card-title float-right">
                                             <div class="input-group input-group-sm" style="width: 150px;">

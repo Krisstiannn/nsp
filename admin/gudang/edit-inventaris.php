@@ -6,7 +6,7 @@ $query_tampilData = "SELECT * FROM inventaris WHERE id = '$id'";
 $result_tampiData = $conn->query($query_tampilData)->fetch_assoc();
 
 if (isset($_POST['btn_submit'])) {
-    $kode_barang = $_POST['kode_barang'];
+    // $kode_barang = $_POST['kode_barang'];
     $nama_barang = $_POST['nama_barang'];
     $kondisi_barang = $_POST['kondisi_barang'];
     $jumlah_barang = $_POST['jumlah_barang'];
@@ -24,7 +24,7 @@ if (isset($_POST['btn_submit'])) {
     // $tmp_file = $_FILES['gambar_barang']['tmp_name'];
     // move_uploaded_file($tmp_file, $dir_foto.$gambar_barang);
 
-    $query_editData = "UPDATE inventaris SET kode_barang = '$kode_barang', nama_barang = '$nama_barang', kondisi_barang = '$kondisi_barang', jumlah_barang = '$jumlah_barang',
+    $query_editData = "UPDATE inventaris SET nama_barang = '$nama_barang', kondisi_barang = '$kondisi_barang', jumlah_barang = '$jumlah_barang',
     gambar_barang = '$gambar_barang', tanggal_masuk = '$tanggal_masuk' WHERE id = $id";
     $result_editData = $conn->query($query_editData);
 
@@ -94,12 +94,12 @@ if (isset($_POST['btn_submit'])) {
                                 <div class="form-group">
                                     <label for="kode">Kode Barang</label>
                                     <input type="text" class="form-control" name="kode_barang" placeholder="Kode Barang"
-                                        value="<?= $result_tampiData['kode_barang'] ?>">
+                                        value="<?= $result_tampiData['kode_barang'] ?>" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label for="sn">Serial Number Barang</label>
-                                    <input type="text" class="form-control" name="sn_barang" placeholder="Serial Number Barang"
-                                        value="<?= $result_tampiData['kode_barang'] ?>">
+                                    <input type="text" class="form-control" name="serial_number" placeholder="Serial Number Barang"
+                                        value="<?= $result_tampiData['serial_number'] ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="gambar">Gambar Barang</label>
@@ -122,16 +122,22 @@ if (isset($_POST['btn_submit'])) {
                                         value="<?= $result_tampiData['nama_barang'] ?>">
                                 </div>
                                 <div class="form-group">
+                                    <label for="merk">merk Barang</label>
+                                    <input type="text" class="form-control" name="merk_barang"
+                                        placeholder="Masukkan merk Barang"
+                                        value="<?= $result_tampiData['merk_barang'] ?>">
+                                </div>
+                                <div class="form-group">
                                     <label for="Spesifikasi">Spesifikasi Barang</label>
-                                    <input type="text" class="form-control" name="spesifikasi"
+                                    <textarea type="text" class="form-control" name="spesifikasi"
                                         placeholder="Masukkan Spesifikasi Barang"
-                                        value="<?= $result_tampiData['nama_barang'] ?>">
+                                        value="<?= $result_tampiData['spesifikasi'] ?>" rows="5"><?= $result_tampiData['spesifikasi'] ?></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label for="Jenis">Jenis Barang</label>
                                     <input type="text" class="form-control" name="jenis_barang"
                                         placeholder="Masukkan Jenis Barang"
-                                        value="<?= $result_tampiData['nama_barang'] ?>">
+                                        value="<?= $result_tampiData['jenis_barang'] ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="kondisi">Kondisi Barang</label>
@@ -142,11 +148,11 @@ if (isset($_POST['btn_submit'])) {
                                         <option>Rusak</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
+                                <!-- <div class="form-group">
                                     <label for="jumlah">Jumlah</label>
                                     <input type="text" class="form-control" name="jumlah_barang" placeholder="Jumlah"
                                         value="<?= $result_tampiData['jumlah_barang'] ?>">
-                                </div>
+                                </div> -->
                                 <div class="form-group">
                                     <label>Tanggal Masuk Barang</label>
                                     <div class="input-group date" id="reservationdate" data-target-input="nearest">

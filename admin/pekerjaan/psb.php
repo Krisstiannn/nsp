@@ -79,10 +79,10 @@ if (isset($_POST['btn_kirim'])) {
                             <div class="card">
                                 <div class="card-header border-transparent">
                                     <div class="card-header">
-                                        <div class="card-title">
+                                        <!-- <div class="card-title">
                                             <a href="tambah-psb.php" class="btn btn-sm btn-success ">Tambah
                                                 Data</a>
-                                        </div>
+                                        </div> -->
 
                                         <div class="card-title float-right">
                                             <div class="input-group input-group-sm" style="width: 150px;">
@@ -91,7 +91,7 @@ if (isset($_POST['btn_kirim'])) {
 
                                                 <div class="input-group-append">
                                                     <button type="submit" class="btn btn-default">
-                                                        <i class="fas fa-search"></i>
+                                                        <i class="fas fa-times"></i>
                                                     </button>
                                                 </div>
                                             </div>
@@ -111,7 +111,7 @@ if (isset($_POST['btn_kirim'])) {
                                                     <th>Foto KTP</th>
                                                     <th>Paket Internet</th>
                                                     <th>Teknisi Yang Mengerjakan</th>
-                                                    <th>Action</th>
+                                                    <!-- <th>Action</th> -->
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -142,7 +142,7 @@ if (isset($_POST['btn_kirim'])) {
                                                                 class="btn btn-warning btn-sm">Kirim</button>
                                                         </form>
                                                     </td>
-                                                    <td>
+                                                    <!-- <td>
                                                         <a class="btn btn-info btn-sm"
                                                             href="edit-psb.php?id=<?= $psb['id'] ?>">
                                                             <i class="fas fa-pencil-alt">
@@ -155,7 +155,7 @@ if (isset($_POST['btn_kirim'])) {
                                                             </i>
                                                             Delete
                                                         </a>
-                                                    </td>
+                                                    </td> -->
                                                 </tr>
                                                 <?php } ?>
                                             </tbody>

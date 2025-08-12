@@ -3,37 +3,8 @@ include "/xampp/htdocs/nsp/services/koneksi.php";
 
 $query_tampilData = "SELECT * FROM material";
 $result_tampilData = $conn->query($query_tampilData);
-
-$sql = "
-    SELECT barang, SUM(jumlah) AS total_digunakan 
-    FROM (
-        SELECT barang1 AS barang, jumlah1 AS jumlah FROM report
-        UNION ALL
-        SELECT barang2, jumlah2 FROM report
-        UNION ALL
-        SELECT barang3, jumlah3 FROM report
-    ) AS combined_report
-    WHERE barang IS NOT NULL
-    GROUP BY barang
-";
-
-$result = $conn->query($sql);
-
-while ($row = $result->fetch_assoc()) {
-    $nama_barang = $row['barang'];
-    $jumlah_digunakan = $row['total_digunakan'];
-
-    // Update jumlah_sisa di tabel barang
-    $update_sql = "UPDATE material SET jumlah_sisa = jumlah_awal - ? WHERE nama_barang = ?";
-    $stmt = $conn->prepare($update_sql);
-    $stmt->bind_param("is", $jumlah_digunakan, $nama_barang);
-    $stmt->execute();
-    $stmt->close();
-}
-
-$conn->close();
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -115,12 +86,11 @@ $conn->close();
                                             <thead class="bg-gradient-cyan">
                                                 <tr>
                                                     <th>Kode Barang</th>
+                                                    <th>Tanggal Masuk Barang</th>
                                                     <th>Gambar Barang</th>
                                                     <th>Nama Barang</th>
-                                                    <th>Jumlah Awal Barang</th>
-                                                    <th>Jumlah Sisa Barang</th>
+                                                    <th>Stock Yang Tersedia</th>
                                                     <th>Satuan</th>
-                                                    <th>Tanggal Masuk Barang</th>
                                                     <th>Status</th>
                                                     <th>Action</th>
                                                 </tr>
@@ -129,29 +99,33 @@ $conn->close();
                                             <tbody>
                                                 <tr>
                                                     <td><?= $material['kode_barang'] ?></td>
+                                                    <td><?= date('d-m-Y', strtotime($material['tanggal_masuk'])) ?></td>
                                                     <td><img src="/nsp/storage/img/<?= $material['gambar_barang'] ?>"
                                                             alt="<?= $material['gambar_barang'] ?>"
-                                                            style="width: 150px;"></td>
+                                                            style="width: 150px;">
+                                                    </td>
                                                     <td><?= $material['nama_barang'] ?></td>
-                                                    <td><?= $material['jumlah_awal'] ?></td>
-                                                    <td><?= $material['jumlah_sisa'] ?></td>
-                                                    <td><?= $material['satuan'] ?></td>
-                                                    <td><?= date('d-m-Y', strtotime($material['tanggal_masuk'])) ?></td>
                                                     <?php
-                                                        $status = "";
-                                                        $sisa = $material['jumlah_sisa'];
-                                                        $awal = $material['jumlah_awal'];
+                                                        $jumlah_sisa = $material['jumlah_awal'];
 
-                                                        if ($sisa == $awal) {
+                                                        $persen = ($jumlah_sisa > 0 && $material['jumlah_awal'] > 0)
+                                                            ? ($jumlah_sisa / $material['jumlah_awal']) * 100
+                                                            : 0;
+
+                                                        if ($jumlah_sisa == $material['jumlah_awal']) {
                                                             $status = '<span class="badge badge-success">MASIH TERSEDIA</span>';
-                                                        } else if ($sisa == ($awal * 0.5)) {
+                                                        } else if ($persen == 50) {
                                                             $status = '<span class="badge badge-warning">SETENGAH</span>';
-                                                        } else if ($sisa <= ($awal * 0.25)) {
-                                                            $status = '<span class="badge badge-danger">PERLU DIRESTOL!</span>';
+                                                        } else if ($persen < 50 && $jumlah_sisa > 0) {
+                                                            $status = '<span class="badge badge-danger">PERLU DIRESTOK!</span>';
+                                                        } else if ($jumlah_sisa == 0) {
+                                                            $status = '<span class="badge badge-dark">HABIS</span>';
                                                         } else {
-                                                            $status = '';
+                                                            $status = '<span class="badge badge-primary">TERSEDIA SEBAGIAN</span>';
                                                         }
-                                                        ?>
+                                                    ?>
+                                                    <td><?= $jumlah_sisa ?></td>
+                                                    <td><?= $material['satuan'] ?></td>
                                                     <td><?= $status ?></td>
                                                     <td>
                                                         <a class="btn btn-info btn-xs"

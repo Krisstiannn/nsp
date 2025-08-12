@@ -31,9 +31,9 @@ if (isset($_POST['btn_logout'])) {
                     <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                         class="nav-link dropdown-toggle text-light">Pembayaran </a>
                     <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
-                        <li><a href="/nsp/pelanggan/pembayaran.php" class="dropdown-item nav-link ">Portal
+                        <li><a href="/nsp/pelanggan/portal_pembayaran.php" class="dropdown-item nav-link ">Portal
                                 Pembayaran </a></li>
-                        <li><a href="/nsp/pelanggan/invoice_pemasangan.php" class="dropdown-item nav-link ">Invoice
+                        <li><a href="/nsp/pelanggan/invoice_pembayaran.php" class="dropdown-item nav-link ">Invoice
                                 Pembayaran </a></li>
                     </ul>
                 </li>
@@ -63,6 +63,7 @@ if (isset($_POST['btn_logout'])) {
                     <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
                         <li><a href="/nsp/pelanggan/ganti_id.php" class="dropdown-item nav-link ">Ganti ID Login </a></li>
                         <li><a href="/nsp/pelanggan/perubahan_paket.php" class="dropdown-item nav-link">Upgrade/Downgrade Paket </a></li>
+                        <li><a href="/nsp/pelanggan/status_request.php" class="dropdown-item nav-link">Status Request </a></li>
                     </ul>
                 </li>
             </ul>

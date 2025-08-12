@@ -4,6 +4,7 @@ include "/xampp/htdocs/nsp/services/koneksi.php";
 $id_user = $_SESSION['id_users'] ?? null;
 $data = "SELECT * FROM pelanggan WHERE id_user = '$id_user'";
 $hasil = $conn->query($data)->fetch_assoc();
+$tanggal = date('Y-m-d');
 
 if (isset($_POST['btn_submit'])) {
     $nama = $_POST['nama_pelanggan'];
@@ -12,8 +13,8 @@ if (isset($_POST['btn_submit'])) {
     $no_telp = $_POST['no_telp'];
     $keluhan = $_POST['keluhan'];
 
-    $insert_laporan = "INSERT INTO perbaikan (id_perbaikan, id_user, id_berlangganan, nama_pelanggan, no_telp, alamat, keluhan) 
-               VALUES ('', '$id_user', '$no_inet', '$nama', '$no_telp', '$alamat', '$keluhan')";
+    $insert_laporan = "INSERT INTO perbaikan (id_perbaikan, id_user, id_berlangganan, nama_pelanggan, no_telp, alamat, keluhan, tanggal_melapor) 
+               VALUES ('', '$id_user', '$no_inet', '$nama', '$no_telp', '$alamat', '$keluhan', '$tanggal')";
     $result = $conn->query($insert_laporan);
 
     if($result) {

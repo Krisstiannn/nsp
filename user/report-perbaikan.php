@@ -64,6 +64,7 @@ if (isset($_POST['btn_submit'])) {
                 </script>";
         }
     } elseif ($cek->num_rows == 1) {
+        $data = $cek->fetch_assoc();
         $edit = "UPDATE report_perbaikan SET 
                         status = '$status',
                         keterangan = '$keterangan',
@@ -78,19 +79,37 @@ if (isset($_POST['btn_submit'])) {
                 WHERE no_wo = '$id'";
         $hasil = $conn->query($edit);
 
+        if (
+            $hasil && empty($data['material1']) && empty($data['material2']) && empty($data['material3']) &&
+            ($jumlah1 > 0 || $jumlah2 > 0 || $jumlah3 > 0)
+        ) {
+            $materials = [
+                ['nama' => $material1, 'jumlah' => (int)$jumlah1],
+                ['nama' => $material2, 'jumlah' => (int)$jumlah2],
+                ['nama' => $material3, 'jumlah' => (int)$jumlah3]
+            ];
+
+            foreach ($materials as $item) {
+                if (!empty($item['nama']) && $item['jumlah'] > 0) {
+                    $stmt = $conn->prepare("UPDATE material SET jumlah_awal = GREATEST(0, jumlah_awal - ?) WHERE nama_barang = ?");
+                    $stmt->bind_param("is", $item['jumlah'], $item['nama']);
+                    $stmt->execute();
+                    $stmt->close();
+                }
+            }
+        }
         if ($hasil) {
             echo "<script type= 'text/javascript'>
-                    alert('Status Berhasil diudapte!');
+                    alert('Data Berhasil Diupdate');
                     document.location.href = 'wo_perbaikan.php';
                 </script>";
         } else {
             echo "<script type= 'text/javascript'>
-                    alert('Status Gagal diupdate!');
+                    alert('Data Gagal diupdate!');
                     document.location.href = 'report-perbaikan.php';
                 </script>";
         }
     }
-
 }
 ?>
 <!DOCTYPE html>

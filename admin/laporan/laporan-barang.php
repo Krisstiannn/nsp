@@ -11,11 +11,11 @@ $sql = "
     LEFT JOIN (
         SELECT barang, SUM(jumlah) AS total_digunakan 
         FROM (
-            SELECT barang1 AS barang, jumlah1 AS jumlah FROM report
+            SELECT material1 AS barang, jumlah1 AS jumlah FROM report_pemasangan
             UNION ALL
-            SELECT barang2, jumlah2 FROM report
+            SELECT material2, jumlah2 FROM report_pemasangan
             UNION ALL
-            SELECT barang3, jumlah3 FROM report
+            SELECT material3, jumlah3 FROM report_pemasangan
         ) AS combined_report
         WHERE barang IS NOT NULL
         GROUP BY barang
@@ -61,7 +61,7 @@ if (isset($_POST['cetak'])) {
 
     $pdf->SetFont('Arial', 'B', 10);
     $pdf->Cell(60, 10, 'Nama Barang', 1, 0, 'C');
-    $pdf->Cell(40, 10, 'Jumlah Awal', 1, 0, 'C');
+    $pdf->Cell(40, 10, 'Jumlah Stok Barang', 1, 0, 'C');
     $pdf->Cell(50, 10, 'Jumlah Yang Digunakan', 1, 0, 'C');
     $pdf->Cell(40, 10, 'Jumlah Sisa', 1, 1, 'C');
 
@@ -170,7 +170,7 @@ if (isset($_POST['cetak'])) {
                                             <thead class="bg-gradient-cyan">
                                                 <tr>
                                                     <th>Nama Barang</th>
-                                                    <th>Jumlah Awal</th>
+                                                    <th>Jumlah Stok Barang</th>
                                                     <th>Jumlah Yang Digunakan</th>
                                                     <th>Jumlah Sisa</th>
                                                 </tr>

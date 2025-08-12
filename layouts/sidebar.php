@@ -149,6 +149,31 @@ if (isset($_POST['btn_logout'])) {
                                 <p class="text-light">Performa Pegawai</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="/nsp/admin/laporan/laporan-pelanggan.php" class="nav-link">
+                                <i class="far nav-icon"></i>
+                                <p class="text-light">Laporan Pelanggan</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/nsp/admin/laporan/laporan-pemasangan.php" class="nav-link">
+                                <i class="far nav-icon"></i>
+                                <p class="text-light">Laporan Pemasangan</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/nsp/admin/laporan/laporan-perbaikan.php" class="nav-link">
+                                <i class="far nav-icon"></i>
+                                <p class="text-light">Laporan Perbaikan</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/nsp/admin/laporan/laporan-inventaris.php" class="nav-link">
+                                <i class="far nav-icon"></i>
+                                <p class="text-light">Laporan Inventaris</p>
+                            </a>
+                        </li>
+
                     </ul>
                 </li>
                 <li class="nav-item">

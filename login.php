@@ -1,6 +1,8 @@
 <?php
 session_start();
 include "./services/koneksi.php";
+include "./helpers/billing_helper.php";
+date_default_timezone_set('Asia/Makassar');
 
 $notifikasi_login = "";
 if (isset($_POST['btn_login'])) {
@@ -9,7 +11,7 @@ if (isset($_POST['btn_login'])) {
 
     $query_users = "SELECT users.id_users, users.username, users.password, users.peran, 
                            karyawan.nip_karyawan, karyawan.nama_karyawan, karyawan.id, 
-                           pelanggan.nama_pelanggan
+                           pelanggan.nama_pelanggan, pelanggan.id_langganan
                 FROM users 
                 LEFT JOIN karyawan ON users.username = karyawan.nip_karyawan
                 LEFT JOIN pelanggan ON users.id_users = pelanggan.id_user
@@ -34,9 +36,24 @@ if (isset($_POST['btn_login'])) {
             header("location: ./user/index.php");
             exit();
         } else if ($_SESSION["peran"] === "pelanggan") {
-            $_SESSION['nama_pelanggan'] = $data_login['nama_pelanggan'];
-            header("location: ./pelanggan/dashboard.php");
-            exit();
+            $_SESSION['nama_pelanggan'] = $data_login['nama_pelanggan'] ?? '';
+            $_SESSION['id_langganan']   = $data_login['id_langganan'] ?? null;   // <-- WAJIB
+
+            $idUserLogin = (int)$_SESSION['id_users'];
+            $idLangLogin = (string)($_SESSION['id_langganan'] ?? '');
+            
+            $resultBilling = handleBillingOnLogin($conn, $idUserLogin, $idLangLogin);
+
+            // simpan notifikasi ke session untuk ditampilkan di dashboard
+            if (!empty($resultBilling['notif'])) {
+                $_SESSION['notif_tagihan'] = $resultBilling['notif'];
+            } else {
+                unset($_SESSION['notif_tagihan']);
+            }
+
+            // redirect ke dashboard pelanggan
+            header("Location: /nsp/pelanggan/dashboard.php");
+            exit;
         } else {
             $notifikasi_login = "USERNAME ATAU PASSWORD SALAH!!!";
         }

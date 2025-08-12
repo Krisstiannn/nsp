@@ -1,5 +1,35 @@
 <?php
+session_start();
 include "/xampp/htdocs/nsp/services/koneksi.php";
+
+$id = $_SESSION['id_users'];
+$ambil_data = "SELECT * FROM pelanggan WHERE id_user = '$id'";
+$hasil_data = $conn->query($ambil_data)->fetch_assoc();
+
+if(isset($_POST['btn_submit'])) {
+    $nama = $_POST['nama_pelanggan'];
+    $id_langganan = $_POST['id_langganan'];
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    $insertReq = "INSERT INTO request (id_request, nama_pelanggan, id_pelanggan, jenis_request, status) VALUES ('', '$nama', '$id_langganan', 'GANTI ID LOGIN', 'PROSES')";
+    $hasilInsert = $conn->query($insertReq);
+
+    $insertId = "INSERT INTO idLogin (id, id_langganan, username, password) VALUES ('', '$id_langganan', '$username', '$password')";
+    $hasilInsertId = $conn->query($insertId);
+
+        if($hasilInsert->num_rows == 0 && $hasilInsertId->num_rows == 0) {
+            echo "<script type= 'text/javascript'>
+                    alert('Data Berhasil disimpan!');
+                    document.location.href = 'status_request.php';
+                </script>";
+        } else {
+            echo "<script type= 'text/javascript'>
+                alert('Data Gagal disimpan!');
+                document.location.href = 'ganti_id.php';
+            </script>";
+        }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,17 +72,19 @@ include "/xampp/htdocs/nsp/services/koneksi.php";
                                         <div class="card-header">
                                             <h3 class="card-title">Ganti ID Login</h3>
                                         </div>
-                                        <form action="tambah-akun.php" method="POST">
+                                        <form action="" method="POST">
                                             <div class="card-body">
                                                 <div class="form-group">
                                                     <label for="id_langganan">ID Berlangganan</label>
+                                                    <input type="hidden" class="form-control" name="id_langganan" value="<?= $hasil_data['id_langganan']?>">
                                                     <input type="text" class="form-control" name="id_langganan"
-                                                        placeholder="ID Berlangganan">
+                                                        placeholder="ID Berlangganan" value="<?= $hasil_data['id_langganan']?>" disabled>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="nama_pelanggan">Nama Pelanggan</label>
+                                                    <input type="hidden" class="form-control" value="<?= $hasil_data['nama_pelanggan']?>" name="nama_pelanggan">
                                                     <input type="text" class="form-control" name="nama_pelanggan"
-                                                        placeholder="Nama Pelanggan">
+                                                        placeholder="Nama Pelanggan" value="<?= $hasil_data['nama_pelanggan']?>" disabled>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="username">Username</label>

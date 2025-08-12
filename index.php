@@ -51,11 +51,11 @@
                     <ul class="space-y-2">
                         <li class="flex justify-between border-b pb-2">
                             <span>Paket 3 Mbps - 4 Perangkat</span>
-                            <span class="text-blue-700 font-semibold">Rp 130.000</span>
+                            <span class="text-blue-700 font-semibold">Rp 160.000</span>
                         </li>
                         <li class="flex justify-between border-b pb-2">
                             <span>Paket 5 Mbps - 6 Perangkat</span>
-                            <span class="text-blue-700 font-semibold">Rp 160.000</span>
+                            <span class="text-blue-700 font-semibold">Rp 210.000</span>
                         </li>
                         <li class="flex justify-between border-b pb-2">
                             <span>Paket 10 Mbps - 12 Perangkat</span>

@@ -2,9 +2,10 @@
 session_start();
 include "/xampp/htdocs/nsp/services/koneksi.php";
 
+date_default_timezone_set('Asia/Makassar');
 $id = $_GET['id'] ?? null;
 $id_karyawan = $_SESSION['id_karyawan'] ?? null;
-$tanggal = date('d-m-Y');
+$tanggal = date('Y-m-d');
 
 $query = "SELECT psb.id, psb.id_langganan, psb.nama_pelanggan, psb.alamat_pelanggan, psb.wa_pelanggan, wo.id_karyawan, wo.id_psb
 FROM psb
@@ -21,7 +22,8 @@ if (isset($_POST['btn_submit'])) {
     $no_wo = $_POST['no_wo'];
     // $nama_pelanggan = $_POST['nama_pelanggan'];
     // $alamat_pelanggan = $_POST['alamat_pelanggan'];
-    // $wa_pelanggan = $_POST['wa_pelanggan'];
+    // $wa_pelanggan = $_POST['wa_pelanggan'];'
+    // $tanggal_aktif = date('Y-m-d', strtotime($_POST['tanggal_aktif']));
     $id_langganan = $_POST['id_langganan'];
     $status = $_POST['status_pekerjaan'];
     $keterangan = $_POST['keterangan'];
@@ -62,6 +64,7 @@ if (isset($_POST['btn_submit'])) {
                     document.location.href = 'report-pemasangan.php';
                 </script>";
         }
+    $data = $result->fetch_assoc();
     } elseif ($cek->num_rows == 1) {
         $edit = "UPDATE report_pemasangan SET 
                  status = '$status', 
@@ -74,9 +77,28 @@ if (isset($_POST['btn_submit'])) {
                  jumlah3 = '$jumlah3',
                  foto_odp = '$foto_odp',
                  foto_redaman = '$foto_redaman',
-                 foto_modem = '$foto_modem' 
+                 foto_modem = '$foto_modem'
                  WHERE no_wo = '$id'";
         $hasil_edit = $conn->query($edit);
+        if (
+            $hasil_edit && empty($data['material1']) && empty($data['material2']) && empty($data['material3']) &&
+            ($jumlah1 > 0 || $jumlah2 > 0 || $jumlah3 > 0)
+        ) {
+            $materials = [
+                ['nama' => $material1, 'jumlah' => (int)$jumlah1],
+                ['nama' => $material2, 'jumlah' => (int)$jumlah2],
+                ['nama' => $material3, 'jumlah' => (int)$jumlah3]
+            ];
+
+            foreach ($materials as $item) {
+                if (!empty($item['nama']) && $item['jumlah'] > 0) {
+                    $stmt = $conn->prepare("UPDATE material SET jumlah_awal = GREATEST(0, jumlah_awal - ?) WHERE nama_barang = ?");
+                    $stmt->bind_param("is", $item['jumlah'], $item['nama']);
+                    $stmt->execute();
+                    $stmt->close();
+                }
+            }
+        }
         if ($hasil_edit) {
             insertPelanggan($conn, $id_langganan, $tanggal);
             echo "<script type= 'text/javascript'>
@@ -104,7 +126,7 @@ function insertPelanggan($conn, $id_langganan, $tanggal) {
                 p.paket_internet
             FROM psb p
             JOIN report_pemasangan r ON r.id_langganan = p.id_langganan
-            WHERE r.status = 'selesai' AND p.id_langganan = '$id_langganan'";
+            WHERE r.status = 'SELESAI' AND p.id_langganan = '$id_langganan'";
     $result=$conn->query($query);  
     
     if ($result->num_rows > 0) {
@@ -126,16 +148,16 @@ function insertPelanggan($conn, $id_langganan, $tanggal) {
             $password = $tgl . $bln;
 
             $conn->query("INSERT INTO pelanggan 
-                (id_user, id_langganan, nama_pelanggan, alamat_pelanggan, wa_pelanggan, jenis_layanan, status_pelanggan, username, password)
+                (id_user, id_langganan, nama_pelanggan, alamat_pelanggan, wa_pelanggan, jenis_layanan, status_pelanggan, username, password, tanggal_aktif)
                 VALUES 
-                ('$id_user', '$id_langganan', '$nama', '$alamat', '$no_wa', '$paket', 'AKTIF', '$username', '$password')");
+                ('$id_user', '$id_langganan', '$nama', '$alamat', '$no_wa', '$paket', 'AKTIF', '$username', '$password', '$tanggal')");
         }
     }
 }
 
-function generateIdLogin($conn, $id_langganan, $tanggal) {
+// function generateIdLogin($conn, $id_langganan, $tanggal) {
     
-}
+// }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -182,6 +204,7 @@ function generateIdLogin($conn, $id_langganan, $tanggal) {
                         <form action="report-pemasangan.php?id=<?= $result['id'] ?>" method="POST"
                             enctype="multipart/form-data">
                             <div class="card-body">
+                                <input type="text" name="tanggal_aktif" value="<?= $tanggal?>" hidden>
                                 <div class="form-group">
                                     <label for="langganan">ID Berlangganan</label>
                                     <input type="text" class="form-control" name="id_langganan"

@@ -6,10 +6,10 @@ $query_tampilData = "SELECT * FROM material WHERE id = '$id'";
 $result_tampilData = $conn->query($query_tampilData)->fetch_assoc();
 
 if (isset($_POST['btn_submit'])) {
-    $kode_barang = $_POST['kode_barang'];
+    // $kode_barang = $_POST['kode_barang'];
     $nama_barang = $_POST['nama_barang'];
-    $jumlah_awal = $_POST['jumlah_awal'];
-    $jumlah_sisa = $_POST['jumlah_sisa'];
+    $jumlah_awal = $_POST['jumlah_awal'] + $_POST['jumlah_restok'];
+    // $jumlah_sisa = $_POST['jumlah_sisa'];
     $tanggal_masuk = $_POST['tanggal_masuk'];
     if ($_FILES['gambar_barang']['name'] == "") {
         $gambar_barang = $result_tampilData['gambar_barang'];
@@ -24,8 +24,8 @@ if (isset($_POST['btn_submit'])) {
     // $tmp_file = $_FILES['gambar_barang']['tmp_name'];
     // move_uploaded_file($tmp_file, $dir_foto.$gambar_barang);
 
-    $query_editData = "UPDATE material SET kode_barang = '$kode_barang', gambar_barang = '$gambar_barang', nama_barang = '$nama_barang', 
-                       jumlah_awal = '$jumlah_awal', jumlah_sisa = '$jumlah_sisa', tanggal_masuk = '$tanggal_masuk'
+    $query_editData = "UPDATE material SET gambar_barang = '$gambar_barang', nama_barang = '$nama_barang', 
+                       jumlah_awal = '$jumlah_awal', tanggal_masuk = '$tanggal_masuk'
                        WHERE id = '$id'";
     $result_editData = $conn->query($query_editData);
 
@@ -96,7 +96,7 @@ if (isset($_POST['btn_submit'])) {
                                 <div class="form-group">
                                     <label for="kode">Kode Barang</label>
                                     <input type="text" class="form-control" name="kode_barang" placeholder="Kode Barang"
-                                        value="<?= $result_tampilData['kode_barang'] ?>">
+                                        value="<?= $result_tampilData['kode_barang'] ?>" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label for="gambar">Gambar Barang</label>
@@ -127,12 +127,9 @@ if (isset($_POST['btn_submit'])) {
                                         barang</i>
                                 </div>
                                 <div class="form-group">
-                                    <label for="jumlah">Jumlah Sisa Barang</label>
-                                    <input type="text" class="form-control" name="jumlah_sisa"
-                                        placeholder="Jumlah Sisa Barang"
-                                        value="<?= $result_tampilData['jumlah_sisa'] ?>">
-                                    <i for="jumlah" class="text-red" style="font-size: 11px;">*sertakan satuan
-                                        barang</i>
+                                    <label for="jumlah">Jumlah Restok Barang</label>
+                                    <input type="text" class="form-control" name="jumlah_restok"
+                                        placeholder="Jumlah Restok Barang">
                                 </div>
                                 <div class="form-group">
                                     <label>Tanggal Masuk Barang</label>

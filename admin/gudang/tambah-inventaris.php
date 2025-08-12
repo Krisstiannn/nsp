@@ -1,11 +1,28 @@
 <?php
 include "/xampp/htdocs/nsp/services/koneksi.php";
 
+$data_kode = mysqli_query($conn, "SELECT MAX(kode_barang) AS max_code FROM inventaris");
+$data = mysqli_fetch_assoc($data_kode);
+$kode_terakhir = $data['max_code'];
+
+if($kode_terakhir) {
+    $urutan = (int) substr($kode_terakhir, 3);
+    $urutan++;
+} else {
+    $urutan = 1001;
+}
+
+$kode_barang = "NSP".$urutan;
+
 if (isset($_POST['btn_submit'])) {
-    $kode_barang = $_POST['kode_barang'];
+    //$kode_barang = $_POST['kode_barang'];
+    $serial_number = $_POST['serial_number'];
     $nama_barang = $_POST['nama_barang'];
+    $merk = $_POST['merk_barang'];
     $kondisi_barang = $_POST['kondisi_barang'];
-    $jumlah_barang = $_POST['jumlah_barang'];
+    $spesifikasi = $_POST['spesifikasi'];
+    $jenis_barang = $_POST['jenis_barang'];
+    // $jumlah_barang = $_POST['jumlah_barang'];
     $gambar_barang = $_FILES['gambar_barang']['name'];
     $tanggal_masuk = $_POST['tanggal_masuk'];
 
@@ -13,15 +30,15 @@ if (isset($_POST['btn_submit'])) {
     $tmp_file = $_FILES['gambar_barang']['tmp_name'];
     move_uploaded_file($tmp_file, $dir_foto . $gambar_barang);
 
-    if (empty($kode_barang) || empty($nama_barang) || empty($kondisi_barang) || empty($jumlah_barang) || empty($gambar_barang) || empty($tanggal_masuk)) {
+    if (empty($nama_barang) || empty($kondisi_barang) || empty($jenis_barang) || empty($merk) || empty($serial_number) || empty($spesifikasi) || empty($gambar_barang) || empty($tanggal_masuk)) {
         echo "<script type= 'text/javascript'>
                 alert('Tolong isi data dengan benar!');
                 document.location.href = 'tambah-inventaris.php';
             </script>";
         die();
     } else {
-        $query_tambahData = "INSERT INTO inventaris (id, kode_barang, nama_barang, kondisi_barang, jumlah_barang, gambar_barang, tanggal_masuk) 
-        VALUES ('', '$kode_barang', '$nama_barang', '$kondisi_barang','$jumlah_barang', '$gambar_barang', '$tanggal_masuk')";
+        $query_tambahData = "INSERT INTO inventaris (id, kode_barang, nama_barang, kondisi_barang, jenis_barang, gambar_barang, tanggal_masuk, merk_barang, spesifikasi, serial_number) 
+        VALUES ('', '$kode_barang', '$nama_barang', '$kondisi_barang','$jenis_barang', '$gambar_barang', '$tanggal_masuk', '$merk', '$spesifikasi', '$serial_number')";
         $result_tambahData = $conn->query($query_tambahData);
 
         if ($result_tambahData) {
@@ -91,12 +108,13 @@ if (isset($_POST['btn_submit'])) {
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="kode">Kode Barang</label>
+                                    <input type="text" class="form-control" name="kode_barang" value="<?= $kode_barang?>" hidden>
                                     <input type="text" class="form-control" name="kode_barang"
-                                        placeholder="Kode Barang">
+                                        placeholder="Kode Barang" value="<?= $kode_barang?>" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label for="sn">Serial Number Barang</label>
-                                    <input type="text" class="form-control" name="sn_barang"
+                                    <input type="text" class="form-control" name="serial_number"
                                         placeholder="Serial Number Barang">
                                 </div>
                                 <div class="form-group">
@@ -115,9 +133,14 @@ if (isset($_POST['btn_submit'])) {
                                         placeholder="Masukkan Nama Barang">
                                 </div>
                                 <div class="form-group">
+                                    <label for="merk">Merk Barang</label>
+                                    <input type="text" class="form-control" name="merk_barang"
+                                        placeholder="Masukkan Merk Barang">
+                                </div>
+                                <div class="form-group">
                                     <label for="Spesifikasi">Spesifikasi Barang</label>
-                                    <input type="text" class="form-control" name="spesifikasi"
-                                        placeholder="Masukkan Spesifikasi Barang">
+                                    <textarea type="text" class="form-control" name="spesifikasi"
+                                        placeholder="Masukkan Spesifikasi Barang" rows="5"></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label for="Jenis">Jenis Barang</label>
@@ -133,10 +156,10 @@ if (isset($_POST['btn_submit'])) {
                                         <option>Rusak</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
+                                <!-- <div class="form-group">
                                     <label for="jumlah">Jumlah</label>
                                     <input type="text" class="form-control" name="jumlah_barang" placeholder="Jumlah">
-                                </div>
+                                </div> -->
                                 <div class="form-group">
                                     <label>Tanggal Masuk Barang</label>
                                     <div class="input-group date" id="reservationdate" data-target-input="nearest">

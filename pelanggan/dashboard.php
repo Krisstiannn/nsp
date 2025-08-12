@@ -1,7 +1,7 @@
 <?php
 session_start();
 include "/xampp/htdocs/nsp/services/koneksi.php";
-$test = $_SESSION['id_users'] ?? null;
+$nama = $_SESSION['nama_pelanggan'] ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -31,9 +31,16 @@ $test = $_SESSION['id_users'] ?? null;
                         <div class="container-fluid text-black">
                             <div class="row mb-2">
                                 <div class="col-sm-12">
-                                    <h1 class="m-0">Selamat Datang <?= $test?> di Website Resmi Net Sun Power</h1>
+                                    <h1 class="m-0">Selamat Datang <?= $nama?> di Website Resmi Net Sun Power</h1>
                                 </div>
                             </div>
+
+                            <?php if (!empty($_SESSION['notif_tagihan'])): ?>
+                            <div class="alert alert-warning">
+                                <?= htmlspecialchars($_SESSION['notif_tagihan']) ?>
+                            </div>
+                            <?php endif; ?>
+
                         </div>
                         <!-- <div class="container-fluid ">
                             <div class="row mb-2">

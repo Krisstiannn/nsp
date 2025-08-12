@@ -66,10 +66,10 @@ if (isset($_POST['cari'])) {
                             <div class="card">
                                 <div class="card-header border-transparent">
                                     <div class="card-header">
-                                        <div class="card-title">
+                                        <!-- <div class="card-title">
                                             <a href="tambah-pelanggan.php" class="btn btn-sm btn-success ">Tambah
                                                 Data</a>
-                                        </div>
+                                        </div> -->
 
                                         <div class="card-title float-right">
                                             <div class="input-group input-group-sm" style="width: 150px;">
@@ -97,7 +97,7 @@ if (isset($_POST['cari'])) {
                                                     <th rowspan="2">Jenis Layanan</th>
                                                     <th colspan="2">ID Login</th>
                                                     <th rowspan="2">Status</th>
-                                                    <th rowspan="2">Action</th>
+                                                    <!-- <th rowspan="2">Action</th> -->
                                                 </tr>
                                                 <tr>
                                                     <th>Username</th>
@@ -115,7 +115,7 @@ if (isset($_POST['cari'])) {
                                                         <td><?= $pelanggan['username']?></td>
                                                         <td><?= $pelanggan['password']?></td>
                                                         <td><?= $pelanggan['status_pelanggan'] ?></td>
-                                                        <td>
+                                                        <!-- <td>
                                                             <a class="btn btn-info btn-sm"
                                                                 href="edit-pelanggan.php?id=<?= $pelanggan['id'] ?>">
                                                                 <i class="fas fa-pencil-alt">
@@ -129,7 +129,7 @@ if (isset($_POST['cari'])) {
                                                                 </i>
                                                                 Delete
                                                             </a>
-                                                        </td>
+                                                        </td> -->
                                                     </tr>
                                                 </tbody>
                                             <?php } ?>
