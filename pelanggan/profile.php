@@ -61,36 +61,48 @@ $hasil = $conn->query($data)->fetch_assoc();
                         <h3 class="profile-username text-center pb-3"><?= $hasil['nama_pelanggan']?></h3>
                         <ul class="list-group list-group-unbordered mb-3">
                             <li class="list-group-item">
-                                <b>No Inet/ID Langganan</b> <p class="float-right"><?= $hasil['id_langganan']?></p>
+                                <b>No Inet/ID Langganan</b>
+                                <p class="float-right"><?= $hasil['id_langganan']?></p>
                             </li>
                             <li class="list-group-item">
-                                <b>Jenis Paket</b> <p class="float-right"><?= $hasil['jenis_layanan']?></p>
+                                <b>Jenis Paket</b>
+                                <p class="float-right"><?= $hasil['jenis_layanan']?></p>
                             </li>
                             <li class="list-group-item">
-                                <b>Kecepatan</b> <p class="float-right"><?= $hasil['kecepatan']?></p>
+                                <b>Kecepatan</b>
+                                <p class="float-right"><?= $hasil['kecepatan']?></p>
                             </li>
                             <li class="list-group-item">
-                                <b>Status</b> <p class="float-right"><?= $hasil['status_pelanggan']?></p>
+                                <b>Status</b>
+                                <p class="float-right"><?= $hasil['status_pelanggan']?></p>
                             </li>
                             <li class="list-group-item">
-                                <b>Jatuh Tempo</b> <p class="float-right">Tanggal 15</p>
+                                <b>Jatuh Tempo</b>
+                                <p class="float-right">Tanggal 15</p>
                             </li>
                             <li class="list-group-item">
-                                <b>Biaya Bulanan</b> <p class="float-right"><?= "Rp. " . number_format($hasil['harga'], 0, ',', '.');?></p>
+                                <b>Biaya Bulanan</b>
+                                <p class="float-right"><?= "Rp. " . number_format($hasil['harga'], 0, ',', '.');?></p>
                             </li>
                             <li class="list-group-item">
-                                <b>Username</b> <p class="float-right"><?= $hasil['username']?></p>
+                                <b>Username</b>
+                                <p class="float-right"><?= $hasil['username']?></p>
                             </li>
                             <li class="list-group-item">
-                                <b>Password</b> <p class="float-right"><?= $hasil['password']?></p>
+                                <b>Password</b>
+                                <p class="float-right"><?= $hasil['password']?></p>
                             </li>
                         </ul>
-                        <ul class="list-group list-group-unbordered">
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <a href="" class="btn btn-xl btn-danger">Berhenti Berlangganan</a>
-                                </div>
-                            </div>
+                        <ul>
+                            <form action="/nsp/pelanggan/berhenti_langganan.php" method="post"
+                                onsubmit="return confirm('Yakin ingin berhenti berlangganan? Tagihan yang belum dibayar tetap harus diselesaikan.');">
+                                <input type="hidden" name="id_langganan"
+                                    value="<?= htmlspecialchars($hasil['id_langganan']) ?>">
+                                <button type="submit" name="stop" class="btn btn-danger"
+                                    <?= ($hasil['status_pelanggan']!=='AKTIF')?'disabled':''; ?>>
+                                    Berhenti Berlangganan
+                                </button>
+                            </form>
                         </ul>
                     </div>
                 </div>

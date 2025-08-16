@@ -35,11 +35,27 @@ $nama = $_SESSION['nama_pelanggan'] ?? null;
                                 </div>
                             </div>
 
+                            <?php
+                            foreach (['flash_success'=>'success','flash_error'=>'danger','flash_info'=>'info'] as $k=>$cls) {
+                            if (!empty($_SESSION[$k])) {
+                                echo '<div class="alert alert-'.$cls.'">'.htmlspecialchars($_SESSION[$k]).'</div>';
+                                unset($_SESSION[$k]);
+                            }
+                            }
+                            ?>
+
+                            <?php if (!empty($_SESSION['notif_isolir'])): ?>
+                            <div class="alert alert-danger">
+                                <?= htmlspecialchars($_SESSION['notif_isolir']) ?>
+                            </div>
+                            <?php endif; ?>
+
                             <?php if (!empty($_SESSION['notif_tagihan'])): ?>
                             <div class="alert alert-warning">
                                 <?= htmlspecialchars($_SESSION['notif_tagihan']) ?>
                             </div>
                             <?php endif; ?>
+
 
                         </div>
                         <!-- <div class="container-fluid ">

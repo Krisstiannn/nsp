@@ -41,14 +41,24 @@ if (isset($_POST['btn_login'])) {
 
             $idUserLogin = (int)$_SESSION['id_users'];
             $idLangLogin = (string)($_SESSION['id_langganan'] ?? '');
-            
-            $resultBilling = handleBillingOnLogin($conn, $idUserLogin, $idLangLogin);
 
-            // simpan notifikasi ke session untuk ditampilkan di dashboard
-            if (!empty($resultBilling['notif'])) {
-                $_SESSION['notif_tagihan'] = $resultBilling['notif'];
-            } else {
-                unset($_SESSION['notif_tagihan']);
+            if (!empty($idLangLogin)) {
+                // 1) buat tagihan bulan ini jika belum ada
+                $resultBilling = handleBillingOnLogin($conn, $idUserLogin, $idLangLogin);
+                if (!empty($resultBilling['notif'])) {
+                    $_SESSION['notif_tagihan'] = $resultBilling['notif'];
+                } else {
+                    unset($_SESSION['notif_tagihan']);
+                }
+
+                // 2) cek & terapkan isolir
+                $iso = applyIsolationStatus($conn, $idUserLogin, $idLangLogin);
+                $_SESSION['isolir'] = $iso['isolir'];
+                if (!empty($iso['notif'])) {
+                    $_SESSION['notif_isolir'] = $iso['notif'];
+                } else {
+                    unset($_SESSION['notif_isolir']);
+                }
             }
 
             // redirect ke dashboard pelanggan

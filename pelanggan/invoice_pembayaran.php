@@ -1,11 +1,33 @@
 <?php
 session_start();
+if (!isset($_SESSION['id_users']) || ($_SESSION['peran'] ?? '') !== 'pelanggan') {
+    header("Location: /nsp/login.php"); exit;
+}
 include "/xampp/htdocs/nsp/services/koneksi.php";
+date_default_timezone_set('Asia/Makassar');
 
-$id_user = $_SESSION['id_users'];
-$nama_pelanggan = $_SESSION['nama_pelanggan'];
+$idUser = (int)$_SESSION['id_users'];
+
+$sql = $conn->prepare("
+    SELECT 
+      pb.tanggal_pembayaran,
+      pb.id_langganan,
+      pel.nama_pelanggan,
+      psb.paket_internet AS jenis_layanan,
+      pb.jumlah_tagihan,
+      pb.status_pembayaran
+    FROM pembayaran pb
+    JOIN pelanggan pel ON pel.id_langganan = pb.id_langganan
+    LEFT JOIN psb ON psb.id_langganan = pb.id_langganan
+    WHERE pel.id_user = ? AND pb.status_pembayaran = 'SUDAH BAYAR'
+    ORDER BY pb.tanggal_pembayaran DESC, pb.bulan_tagihan DESC
+");
+$sql->bind_param("i", $idUser);
+$sql->execute();
+$result = $sql->get_result();
+
+function rupiah($n){ return 'Rp. ' . number_format((int)$n,0,',','.'); }
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 
@@ -21,54 +43,48 @@ $nama_pelanggan = $_SESSION['nama_pelanggan'];
 <body class="hold-transition layout-top-nav">
     <div class="wrapper">
         <?php include "/xampp/htdocs/nsp/layouts/navbar.php" ?>
-        <div class="content-wrapper">
-            <div class="content">
-                <div class="container">
-                    <section class="content-header">
-                        <h1 class="m-0">History Pembayaran</h1>
-                    </section>
 
-                    <section class="content">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">History Tagihan Bulanan</h3>
-                            </div>
-                            <div class="card-body">
-                                <table class="table table-bordered table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Tanggal Pembayaran</th>
-                                            <th>ID Langganan</th>
-                                            <th>Nama Pelanggan</th>
-                                            <th>Jenis Layanan</th>
-                                            <th>Tagihan Bulanan</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>07 - 06 - 2025</td>
-                                            <td>212907250819</td>
-                                            <td>Nisaa</td>
-                                            <td>Paket 12 Perangkat</td>
-                                            <td>Rp. 275.000</td>
-                                            <td style ="color: green;">SUDAH BAYAR</td>
-                                        </tr>
-                                        <tr>
-                                            <td>07 - 07 - 2025</td>
-                                            <td>212907250819</td>
-                                            <td>Nisaa</td>
-                                            <td>Paket 12 Perangkat</td>
-                                            <td>Rp. 275.000</td>
-                                            <td style ="color: green;">SUDAH BAYAR</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+        <div class="content-wrapper">
+            <section class="content">
+                <div class="container py-4">
+                    <h3>History Pembayaran</h3>
+                    <?php if (isset($_GET['ok'])): ?>
+                    <div class="alert alert-success">Pembayaran berhasil. Status sudah tercatat sebagai <b>SUDAH
+                            BAYAR</b>.</div>
+                    <?php endif; ?>
+
+                    <div class="card">
+                        <div class="card-header">History Tagihan Bulanan</div>
+                        <div class="card-body p-0">
+                            <table class="table table-striped mb-0 text-center">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal Pembayaran</th>
+                                        <th>ID Langganan</th>
+                                        <th>Nama Pelanggan</th>
+                                        <th>Jenis Layanan</th>
+                                        <th>Tagihan Bulanan</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php while($row = $result->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?= date('d - m - Y', strtotime($row['tanggal_pembayaran'])) ?></td>
+                                        <td><?= htmlspecialchars($row['id_langganan']) ?></td>
+                                        <td><?= htmlspecialchars($row['nama_pelanggan']) ?></td>
+                                        <td><?= htmlspecialchars($row['jenis_layanan'] ?? '-') ?></td>
+                                        <td><?= rupiah($row['jumlah_tagihan']) ?></td>
+                                        <td class="text-success font-weight-bold">SUDAH BAYAR</td>
+                                    </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
+                            </table>
                         </div>
-                    </section>
+                    </div>
+
                 </div>
-            </div>
+            </section>
         </div>
 
         <div class="card bg-light p-3">
@@ -88,9 +104,6 @@ $nama_pelanggan = $_SESSION['nama_pelanggan'];
             reserved.
         </footer>
     </div>
-
-
-
     <script src="/nsp/plugins/jquery/jquery.min.js"></script>
     <script src="/nsp/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="/nsp/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>

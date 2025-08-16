@@ -33,7 +33,7 @@ if (isset($_POST['btn_logout'])) {
                     <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
                         <li><a href="/nsp/pelanggan/portal_pembayaran.php" class="dropdown-item nav-link ">Portal
                                 Pembayaran </a></li>
-                        <li><a href="/nsp/pelanggan/invoice_pembayaran.php" class="dropdown-item nav-link ">Invoice
+                        <li><a href="/nsp/pelanggan/invoice_pembayaran.php" class="dropdown-item nav-link ">History
                                 Pembayaran </a></li>
                     </ul>
                 </li>
@@ -80,7 +80,6 @@ if (isset($_POST['btn_logout'])) {
 
                 <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
                     <li><a href="/nsp/pelanggan/profile.php" class="dropdown-item">Profile</a></li>
-                    <li><a href="/nsp/pelanggan/reset_password.php" class="dropdown-item">Reset Password</a></li>
                     <li class="dropdown-divider"></li>
                     <form action="" method="POST">
                         <li class="dropdown-submenu dropdown-hover">
