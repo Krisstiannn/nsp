@@ -141,7 +141,7 @@ $result_tampilData = $conn->query($query_tampilData);
                                                 <tbody>
                                                     <tr>
                                                         <td><?= $inventaris['kode_barang'] ?></td>
-                                                        <td>Serial Number</td>
+                                                        <td><?= $inventaris['serial_number'] ?></td>
                                                         <td>
                                                             <img src="/nsp/storage/img/<?= $inventaris['gambar_barang'] ?>"
                                                                 alt="<?= $inventaris['gambar_barang'] ?>"

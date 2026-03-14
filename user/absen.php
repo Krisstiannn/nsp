@@ -9,34 +9,53 @@ $nama_karyawan = $_SESSION['nama_karyawan'];
 $tanggal = date('Y-m-d');
 $jam = date('H:i:s');
 
+// Jam kerja standar
+$jam_masuk_standar = "09:00:00";
+$jam_pulang_standar = "17:00:00";
+
 $query_id_karyawan = "SELECT id FROM karyawan WHERE nip_karyawan = '$nip_karyawan'";
 $result_id = $conn->query($query_id_karyawan);
 
-$query_tampilData = "SELECT * FROM absen WHERE id_karyawan = '$id'";
+$query_tampilData = "SELECT * FROM absen WHERE id_karyawan = '$id' ORDER BY tanggal DESC";
 $tampil_data = $conn->query($query_tampilData);
 
+// Proses Absen Masuk
 if (isset($_POST['btn_absen'])) {
     if ($result_id->num_rows > 0) {
         $row = $result_id->fetch_assoc();
         $id_karyawan = $row['id'];
 
-        $sql = "INSERT INTO absen (id, id_karyawan, nip_karyawan, nama_karyawan, tanggal, jam_masuk) 
-                VALUES (NULL, '$id_karyawan', '$nip_karyawan', '$nama_karyawan', '$tanggal', '$jam')";
+        $validasi_absen = "SELECT * FROM absen WHERE nip_karyawan = '$nip_karyawan' AND tanggal = '$tanggal'";
+        $validasi_result = $conn->query($validasi_absen);
 
+        if ($validasi_result->num_rows > 0) {
+            echo "<script>alert('Anda sudah absen masuk hari ini!');</script>";
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
+        }
+
+        // Tentukan status masuk
+        $status_masuk = ($jam <= $jam_masuk_standar) ? "Tepat Waktu" : "Terlambat";
+
+        $sql = "INSERT INTO absen (id, id_karyawan, nip_karyawan, nama_karyawan, tanggal, jam_masuk, status_masuk) 
+                VALUES (NULL, '$id_karyawan', '$nip_karyawan', '$nama_karyawan', '$tanggal', '$jam', '$status_masuk')";
         $result = $conn->query($sql);
 
         if ($result === TRUE) {
             echo "<script type='text/javascript'>alert('Absen BERHASIL Dilakukan!');</script>";
             header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
         } else {
-            echo "<script type='text/javascript'>alert('Absen GAGAL Di Lakukan!');</script>";
+            echo "<script type='text/javascript'>alert('Absen GAGAL Dilakukan!');</script>";
             header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
         }
     } else {
         echo "<script type='text/javascript'>alert('Data Karyawan Tidak Ditemukan!');</script>";
     }
 }
 
+// Proses Absen Keluar
 if (isset($_POST['absen_keluar'])) {
     $query_tampilabsen = "SELECT id, jam_keluar FROM absen 
                 WHERE nip_karyawan = '$nip_karyawan' 
@@ -48,8 +67,11 @@ if (isset($_POST['absen_keluar'])) {
         $absen = $tampil_absen->fetch_assoc();
 
         if (empty($absen['jam_keluar'])) {
+            // Tentukan status keluar
+            $status_keluar = ($jam > $jam_pulang_standar) ? "Lembur" : "Pulang Tepat Waktu";
+
             $update = "UPDATE absen 
-            SET jam_keluar = '$jam' 
+            SET jam_keluar = '$jam', status_keluar = '$status_keluar' 
             WHERE nip_karyawan = '$nip_karyawan' 
             AND tanggal = '$tanggal' 
             AND jam_keluar IS NULL 
@@ -57,13 +79,16 @@ if (isset($_POST['absen_keluar'])) {
             if ($conn->query($update) === TRUE) {
                 echo "<script>alert('Terima Kasih Sudah Berjuang Hari Ini :)');</script>";
                 header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
             } else {
                 echo "<script>alert('Gagal memperbarui jam keluar.');</script>";
                 header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
             }
         } else {
-            echo "<script>alert('Anda sudah absen keluar hari ini!');</script>";
+            echo "<script>alert('Anda sudah melakukan absen keluar hari ini!');</script>";
             header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
         }
     } else {
         echo "<script>alert('Anda belum absen masuk hari ini!');</script>";
@@ -86,22 +111,45 @@ if (isset($_POST['absen_keluar'])) {
     <link rel="stylesheet" href="/nsp/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
     <link rel="stylesheet" href="/nsp/dist/css/adminlte.min.css">
     <link rel="icon" href="/nsp/storage/nsp.jpg">
+    <style>
+        .status-tepat {
+            background-color: #28a745;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .status-terlambat {
+            background-color: #dc3545;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .status-lembur {
+            background-color: #007bff;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .status-pulang {
+            background-color: #ffc107;
+            color: black;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+    </style>
 </head>
 
-<body class="hold-transition  sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
     <div class="wrapper">
 
-        <!-- Navbar -->
         <?php include "/xampp/htdocs/nsp/layouts/header.php" ?>
-        <!-- Navbar -->
-
-        <!-- Main Sidebar Container -->
         <?php include "/xampp/htdocs/nsp/layouts/sidebar-user.php" ?>
-        <!-- END Main Sidebar -->
 
-        <!-- Main Content -->
         <div class="content-wrapper bg-gradient-white">
-
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
@@ -115,70 +163,64 @@ if (isset($_POST['absen_keluar'])) {
             <section class="content">
                 <div class="container-fluid">
                     <div class="row">
-                        <!-- Left col -->
                         <div class="col-md-12">
-                            <div class="row">
-                                <div class="col-md-6">
-                                </div>
-                                <div class="col-md-6">
-                                </div>
-                            </div>
                             <div class="card">
                                 <div class="card-header border-transparent">
-                                    <div class="card-tools">
-                                        <div class="input-group input-group-sm" style="width: 150px;">
-                                            <input type="text" name="table_search" class="form-control float-right"
-                                                placeholder="Search">
-
-                                            <div class="input-group-append">
-                                                <button type="submit" class="btn btn-default">
-                                                    <i class="fas fa-search"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <form method="POST">
+                                        <button type="submit" name="btn_absen" class="btn btn-success btn-sm">Absen Masuk</button>
+                                        <button type="submit" name="absen_keluar" class="btn btn-danger btn-sm">Absen Keluar</button>
+                                    </form>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive">
                                         <table class="table table-bordered text-center">
                                             <thead class="bg-gradient-cyan">
                                                 <tr>
-                                                    <th>Nomor Induk Pegawai</th>
+                                                    <th>NIP</th>
                                                     <th>Nama Karyawan</th>
                                                     <th>Tanggal</th>
-                                                    <th>Absen Masuk</th>
-                                                    <th>Absen Pulang</th>
+                                                    <th>Jam Masuk</th>
+                                                    <th>Status Masuk</th>
+                                                    <th>Jam Keluar</th>
+                                                    <th>Status Keluar</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($tampil_data as $absen) { ?>
-                                                    <tr>
-                                                        <td><?= $absen['nip_karyawan'] ?></td>
-                                                        <td><?= $absen['nama_karyawan'] ?></td>
-                                                        <td><?= date('d-m-Y', strtotime($absen['tanggal'])) ?></td>
-                                                        <td><?= $absen['jam_masuk'] ?></td>
-                                                        <td><?= $absen['jam_keluar'] ?></td>
-                                                    </tr>
+                                                <tr>
+                                                    <td><?= $absen['nip_karyawan'] ?></td>
+                                                    <td><?= $absen['nama_karyawan'] ?></td>
+                                                    <td><?= date('d-m-Y', strtotime($absen['tanggal'])) ?></td>
+                                                    <td><?= $absen['jam_masuk'] ?></td>
+                                                    <td>
+                                                        <?php if ($absen['status_masuk'] == 'Tepat Waktu') { ?>
+                                                            <span class="status-tepat">Tepat Waktu</span>
+                                                        <?php } elseif ($absen['status_masuk'] == 'Terlambat') { ?>
+                                                            <span class="status-terlambat">Terlambat</span>
+                                                        <?php } else { echo "-"; } ?>
+                                                    </td>
+                                                    <td><?= $absen['jam_keluar'] ?: '-' ?></td>
+                                                    <td>
+                                                        <?php if ($absen['status_keluar'] == 'Lembur') { ?>
+                                                            <span class="status-lembur">Lembur</span>
+                                                        <?php } elseif ($absen['status_keluar'] == 'Pulang Tepat Waktu') { ?>
+                                                            <span class="status-pulang">Pulang Tepat</span>
+                                                        <?php } else { echo "-"; } ?>
+                                                    </td>
+                                                </tr>
                                                 <?php } ?>
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
-                                <!-- <div class="card-footer clearfix">
-                                    <a href="javascript:void(0)" class="btn btn-sm btn-success float-right ">Tambah
-                                        Data</a>
-                                </div> -->
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
         </div>
-        <!-- END Main Content -->
 
-        <!-- Main Footer -->
         <?php include "/xampp/htdocs/nsp/layouts/footer.php" ?>
-        <!-- End Footer -->
     </div>
 
     <script src="/nsp/plugins/jquery/jquery.min.js"></script>
@@ -195,5 +237,4 @@ if (isset($_POST['absen_keluar'])) {
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>
-
 </html>

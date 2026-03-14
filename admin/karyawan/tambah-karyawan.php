@@ -1,14 +1,27 @@
 <?php
 include "/xampp/htdocs/nsp/services/koneksi.php";
 
+$data_nip = mysqli_query($conn, "SELECT MAX(nip_karyawan) AS max_code FROM karyawan");
+$data = mysqli_fetch_assoc($data_nip);
+$nip_terakhir = $data['max_code'];
+
+if($nip_terakhir) {
+    $urutan = (int) substr($nip_terakhir, 4);
+    $urutan++;
+} else {
+    $urutan = 1;
+}
+
+$nip_karyawan = "16300".$urutan;
+
 if (isset($_POST['btn_submit'])) {
-    $nip_karyawan = $_POST['nip_karyawan'];
+
     $nama_karyawan = $_POST['nama_karyawan'];
     $jabatan_karyawan = $_POST['jabatan_karyawan'];
     $peran = ($jabatan_karyawan == 'admin') ? 'admin' : 'user';
 
     if (empty($nip_karyawan) || empty($nama_karyawan) || empty($jabatan_karyawan)) {
-        echo "<script type= 'text/javascript'>
+        echo "<script>
                 alert('Tolong isi data dengan benar!');
                 document.location.href = 'tambah-karyawan.php';
             </script>";
@@ -18,34 +31,46 @@ if (isset($_POST['btn_submit'])) {
     $query_nipKaryawan = "SELECT * FROM karyawan WHERE nip_karyawan = '$nip_karyawan'";
     $result_nipKaryawan = $conn->query($query_nipKaryawan);
 
-    if ($result_nipKaryawan->num_rows>0) {
-        echo "<script type= 'text/javascript'>
+    if ($result_nipKaryawan->num_rows > 0) {
+
+        echo "<script>
             alert('NIP Karyawan Sudah Ada!');
             document.location.href = 'tambah-karyawan.php';
         </script>";
         exit;
-    } 
-    
-    $query_tambahAkun = "INSERT INTO users (id_users, username, password, peran) VALUES ('', '$nip_karyawan', '$nama_karyawan', '$jabatan_karyawan')";
+    }
+
+    // PASSWORD DEFAULT = nama karyawan (lalu di hash)
+    $password_default = $nama_karyawan;
+    $password_hash = password_hash($password_default, PASSWORD_DEFAULT);
+
+    $query_tambahAkun = "INSERT INTO users (id_users, username, password, peran) 
+                         VALUES ('', '$nip_karyawan', '$password_hash', '$jabatan_karyawan')";
     $result_tambahAkun = $conn->query($query_tambahAkun);
 
     if ($result_tambahAkun) {
+
         $query_tambahKaryawan = "INSERT INTO karyawan (id, nip_karyawan, nama_karyawan, posisi_karyawan) 
-        VALUES ('','$nip_karyawan', '$nama_karyawan','$jabatan_karyawan')";
+                                 VALUES ('','$nip_karyawan', '$nama_karyawan','$jabatan_karyawan')";
         $result_tambahKaryawan = $conn->query($query_tambahKaryawan);
 
         if ($result_tambahKaryawan) {
-            echo "<script type= 'text/javascript'>
+
+            echo "<script>
                 alert('Data Berhasil Disimpan!');
                 document.location.href = 'datakaryawan.php';
             </script>";
+
         } else {
-            echo "<script type= 'text/javascript'>
+
+            echo "<script>
                 alert('Data Gagal Disimpan!');
                 document.location.href = 'tambah-karyawan.php';
             </script>";
         }
+
     } else {
+
         echo "<script>
             alert('Gagal membuat user: {$conn->error}');
             window.location.href = 'tambah-karyawan.php';
@@ -106,8 +131,9 @@ if (isset($_POST['btn_submit'])) {
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="nip">NIP</label>
+                                    <input type="text" class="form-control" name="nip_karyawan" value="<?= $nip_karyawan ?>" hidden>
                                     <input type="text" class="form-control" name="nip_karyawan"
-                                        placeholder="Nomor Induk Pegawai">
+                                        placeholder="Nomor Induk Pegawai" value="<?= $nip_karyawan ?>" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label for="nama">Nama Karyawan</label>
@@ -119,9 +145,7 @@ if (isset($_POST['btn_submit'])) {
                                     <select class="custom-select" name="jabatan_karyawan">
                                         <option>-- Pilih --</option>
                                         <option>admin</option>
-                                        <option>it</option>
                                         <option>teknisi</option>
-                                        <option>supervisior</option>
                                     </select>
                                 </div>
                             </div>

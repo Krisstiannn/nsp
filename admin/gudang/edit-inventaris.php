@@ -3,20 +3,23 @@ include "/xampp/htdocs/nsp/services/koneksi.php";
 
 $id = $_GET['id'];
 $query_tampilData = "SELECT * FROM inventaris WHERE id = '$id'";
-$result_tampiData = $conn->query($query_tampilData)->fetch_assoc();
+$result_tampilData = $conn->query($query_tampilData)->fetch_assoc();
 
 if (isset($_POST['btn_submit'])) {
     // $kode_barang = $_POST['kode_barang'];
     $nama_barang = $_POST['nama_barang'];
     $kondisi_barang = $_POST['kondisi_barang'];
-    $jumlah_barang = $_POST['jumlah_barang'];
     $tanggal_masuk = $_POST['tanggal_masuk'];
+    $serial_number = $_POST['serial_number'];
+    $merk_barang = $_POST['merk_barang'];
+    $spesifikasi = $_POST['spesifikasi'];
+    $jenis_barang = $_POST['jenis_barang'];
 
     if ($_FILES['gambar_barang']['name'] == "") {
         $gambar_barang = $result_tampilData['gambar_barang'];
     } else {
         $gambar_barang = $_FILES['gambar_barang']['name'];
-        unlink("/xampp/htdocs/nsp/storage/img/" . $result_tampiData['gambar_barang']);
+        unlink("/xampp/htdocs/nsp/storage/img/" . $result_tampilData['gambar_barang']);
         move_uploaded_file($_FILES['gambar_barang']['tmp_name'], "/xampp/htdocs/nsp/storage/img/" . $_FILES['gambar_barang']['name']);
     }
 
@@ -24,8 +27,16 @@ if (isset($_POST['btn_submit'])) {
     // $tmp_file = $_FILES['gambar_barang']['tmp_name'];
     // move_uploaded_file($tmp_file, $dir_foto.$gambar_barang);
 
-    $query_editData = "UPDATE inventaris SET nama_barang = '$nama_barang', kondisi_barang = '$kondisi_barang', jumlah_barang = '$jumlah_barang',
-    gambar_barang = '$gambar_barang', tanggal_masuk = '$tanggal_masuk' WHERE id = $id";
+    $query_editData = "UPDATE inventaris SET 
+    nama_barang='$nama_barang',
+    serial_number='$serial_number',
+    merk_barang='$merk_barang',
+    spesifikasi='$spesifikasi',
+    jenis_barang='$jenis_barang',
+    kondisi_barang='$kondisi_barang',
+    gambar_barang='$gambar_barang',
+    tanggal_masuk='$tanggal_masuk'
+    WHERE id='$id'";
     $result_editData = $conn->query($query_editData);
 
     if ($result_editData) {
@@ -88,27 +99,27 @@ if (isset($_POST['btn_submit'])) {
                         <div class="card-header">
                             <h3 class="card-title">Edit Barang</h3>
                         </div>
-                        <form method="POST" action="edit-inventaris.php?id=<?= $result_tampiData['id'] ?>"
+                        <form method="POST" action="edit-inventaris.php?id=<?= $result_tampilData['id'] ?>"
                             enctype="multipart/form-data">
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="kode">Kode Barang</label>
                                     <input type="text" class="form-control" name="kode_barang" placeholder="Kode Barang"
-                                        value="<?= $result_tampiData['kode_barang'] ?>" disabled>
+                                        value="<?= $result_tampilData['kode_barang'] ?>" disabled>
                                 </div>
                                 <div class="form-group">
                                     <label for="sn">Serial Number Barang</label>
                                     <input type="text" class="form-control" name="serial_number" placeholder="Serial Number Barang"
-                                        value="<?= $result_tampiData['serial_number'] ?>">
+                                        value="<?= $result_tampilData['serial_number'] ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="gambar">Gambar Barang</label>
                                     <div class="input-group">
                                         <div class="custom-file">
                                             <input type="file" class="custom-file-input" name="gambar_barang"
-                                                value="<?= $result_tampiData['gambar_barang'] ?>" accept="image/*">
+                                                value="<?= $result_tampilData['gambar_barang'] ?>" accept="image/*">
                                             <label class="custom-file-label"
-                                                for="exampleInputFile"><?= $result_tampiData['gambar_barang'] ?></label>
+                                                for="exampleInputFile"><?= $result_tampilData['gambar_barang'] ?></label>
                                         </div>
                                         <!-- <div class="input-group-append">
                                             <span class="input-group-text">Upload</span>
@@ -119,30 +130,30 @@ if (isset($_POST['btn_submit'])) {
                                     <label for="nama">Nama Barang</label>
                                     <input type="text" class="form-control" name="nama_barang"
                                         placeholder="Masukkan Nama Barang"
-                                        value="<?= $result_tampiData['nama_barang'] ?>">
+                                        value="<?= $result_tampilData['nama_barang'] ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="merk">merk Barang</label>
                                     <input type="text" class="form-control" name="merk_barang"
                                         placeholder="Masukkan merk Barang"
-                                        value="<?= $result_tampiData['merk_barang'] ?>">
+                                        value="<?= $result_tampilData['merk_barang'] ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="Spesifikasi">Spesifikasi Barang</label>
                                     <textarea type="text" class="form-control" name="spesifikasi"
                                         placeholder="Masukkan Spesifikasi Barang"
-                                        value="<?= $result_tampiData['spesifikasi'] ?>" rows="5"><?= $result_tampiData['spesifikasi'] ?></textarea>
+                                        value="<?= $result_tampilData['spesifikasi'] ?>" rows="5"><?= $result_tampilData['spesifikasi'] ?></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label for="Jenis">Jenis Barang</label>
                                     <input type="text" class="form-control" name="jenis_barang"
                                         placeholder="Masukkan Jenis Barang"
-                                        value="<?= $result_tampiData['jenis_barang'] ?>">
+                                        value="<?= $result_tampilData['jenis_barang'] ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="kondisi">Kondisi Barang</label>
                                     <select class="custom-select" name="kondisi_barang">
-                                        <option><?= $result_tampiData['kondisi_barang'] ?></option>
+                                        <option><?= $result_tampilData['kondisi_barang'] ?></option>
                                         <option>Baru</option>
                                         <option>Bekas</option>
                                         <option>Rusak</option>
@@ -151,14 +162,14 @@ if (isset($_POST['btn_submit'])) {
                                 <!-- <div class="form-group">
                                     <label for="jumlah">Jumlah</label>
                                     <input type="text" class="form-control" name="jumlah_barang" placeholder="Jumlah"
-                                        value="<?= $result_tampiData['jumlah_barang'] ?>">
+                                        value="<?= $result_tampilData['jumlah_barang'] ?>">
                                 </div> -->
                                 <div class="form-group">
                                     <label>Tanggal Masuk Barang</label>
                                     <div class="input-group date" id="reservationdate" data-target-input="nearest">
                                         <input type="date" class="form-control datetimepicker-input"
                                             data-target="#reservationdate" name="tanggal_masuk"
-                                            value="<?= $result_tampiData['tanggal_masuk'] ?>" />
+                                            value="<?= $result_tampilData['tanggal_masuk'] ?>" />
                                     </div>
                                 </div>
                             </div>

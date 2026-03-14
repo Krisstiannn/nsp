@@ -6,20 +6,19 @@ $data = mysqli_fetch_assoc($data_kode);
 $kode_terakhir = $data['max_code'];
 
 if($kode_terakhir) {
-    $urutan = (int) substr($kode_terakhir, 3);
+    $urutan = (int) substr($kode_terakhir, 8);
     $urutan++;
 } else {
     $urutan = 2001;
 }
 
-$kode_barang = "NSP".$urutan;
+$kode_barang = "NSP-MTR-".$urutan;
 
 if (isset($_POST['btn_submit'])) {
-    // $kode_barang = $_POST['kode_barang'];
     $gambar_barang = $_FILES['gambar_barang']['name'];
     $nama_barang = $_POST['nama_barang'];
-    $jumlah_awal = $_POST['jumlah_awal'];
-    // $jumlah_sisa = $_POST['jumlah_sisa'];
+    $stok_barang = $_POST['stok_barang'];
+    $satuan_barang = $_POST['satuan_barang'];
     $tanggal_masuk = $_POST['tanggal_masuk'];
 
     $dir_foto = "/xampp/htdocs/nsp/storage/img/";
@@ -33,8 +32,8 @@ if (isset($_POST['btn_submit'])) {
             </script>";
         die();
     } else {
-        $query_tambahData = "INSERT INTO material (id, kode_barang, gambar_barang, nama_barang, jumlah_awal, tanggal_masuk) 
-        VALUES ('','$kode_barang', '$gambar_barang', '$nama_barang', '$jumlah_awal',  '$tanggal_masuk')";
+        $query_tambahData = "INSERT INTO material (id, kode_barang, gambar_barang, nama_barang, stok_barang, satuan_barang, tanggal_masuk) 
+        VALUES ('','$kode_barang', '$gambar_barang', '$nama_barang', '$stok_barang',  '$satuan_barang', '$tanggal_masuk')";
         $result_tambahData = $conn->query($query_tambahData);
 
         if ($result_tambahData) {
@@ -115,9 +114,6 @@ if (isset($_POST['btn_submit'])) {
                                                 accept="image/*">
                                             <label class="custom-file-label" for="foto"></label>
                                         </div>
-                                        <!-- <div class="input-group-append">
-                                            <span class="input-group-text">Upload</span>
-                                        </div> -->
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -126,19 +122,20 @@ if (isset($_POST['btn_submit'])) {
                                         placeholder="Masukkan Nama Barang">
                                 </div>
                                 <div class="form-group">
-                                    <label for="jumlah">Jumlah Awal Barang</label>
-                                    <input type="text" class="form-control" name="jumlah_awal"
-                                        placeholder="Jumlah Awal Barang">
-                                    <i for="jumlah" class="text-red" style="font-size: 11px;">*sertakan satuan
-                                        barang</i>
+                                    <label for="jumlah">Stok Barang</label>
+                                    <input type="text" class="form-control" name="stok_barang"
+                                        placeholder="Stok Barang">
                                 </div>
-                                <!-- <div class="form-group">
-                                    <label for="jumlah">Jumlah Sisa Barang</label>
-                                    <input type="text" class="form-control" name="jumlah_sisa"
-                                        placeholder="Jumlah Sisa Barang">
-                                    <i for="jumlah" class="text-red" style="font-size: 11px;">*sertakan satuan
-                                        barang</i>
-                                </div> -->
+                               <div class="form-group">
+                                    <label for="satuan">Satuan Barang</label>
+                                    <select class="custom-select" name="satuan_barang">
+                                        <option>-- Pilih --</option>
+                                        <option>UNIT</option>
+                                        <option>PCS</option>
+                                        <option>BUAH</option>
+                                        <option>METER</option>
+                                    </select>
+                                </div>
                                 <div class="form-group">
                                     <label>Tanggal Masuk Barang</label>
                                     <div class="input-group date" id="reservationdate" data-target-input="nearest">

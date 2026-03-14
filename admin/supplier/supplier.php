@@ -1,7 +1,7 @@
 <?php
 include "/xampp/htdocs/nsp/services/koneksi.php";
 
-$query_tampilData = "SELECT * FROM material";
+$query_tampilData = "SELECT * FROM supplier";
 $result_tampilData = $conn->query($query_tampilData);
 ?>
 
@@ -11,7 +11,7 @@ $result_tampilData = $conn->query($query_tampilData);
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Gudang | Material</title>
+    <title>Supplier</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -41,7 +41,7 @@ $result_tampilData = $conn->query($query_tampilData);
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1>Data Material</h1>
+                            <h1>Data Supplier</h1>
                         </div>
                     </div>
                 </div>
@@ -56,7 +56,7 @@ $result_tampilData = $conn->query($query_tampilData);
                                 <div class="card-header border-transparent">
                                     <div class="card-header">
                                         <div class="card-title">
-                                            <a href="tambah-material.php" class="btn btn-sm btn-success ">Tambah
+                                            <a href="tambah-supplier.php" class="btn btn-sm btn-success ">Tambah
                                                 Data</a>
                                         </div>
 
@@ -79,61 +79,25 @@ $result_tampilData = $conn->query($query_tampilData);
                                         <table class="table table-bordered text-center">
                                             <thead class="bg-gradient-cyan">
                                                 <tr>
-                                                    <th>Kode Barang</th>
-                                                    <th>Tanggal Masuk Barang</th>
-                                                    <th>Gambar Barang</th>
-                                                    <th>Nama Barang</th>
-                                                    <th>Stock Yang Tersedia</th>
-                                                    <th>Satuan</th>
-                                                    <th>Status</th>
+                                                    <th>Nama Supplier</th>
+                                                    <th>Alamat Supplier</th>
+                                                    <th>Kontak Supplier</th>
+                                                    <th>Nama PIC</th>
+                                                    <th>Kontak PIC</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
                                             <?php foreach ($result_tampilData as $material) { ?>
                                             <tbody>
                                                 <tr>
-                                                    <td><?= $material['kode_barang'] ?></td>
-                                                    <td><?= date('d-m-Y', strtotime($material['tanggal_masuk'])) ?></td>
-                                                    <td><img src="/nsp/storage/img/<?= $material['gambar_barang'] ?>"
-                                                            alt="<?= $material['gambar_barang'] ?>"
-                                                            style="width: 150px;">
-                                                    </td>
-                                                    <td><?= $material['nama_barang'] ?></td>
-                                                    <?php
-                                                        $jumlah_sisa = $material['stok_barang'];
-
-                                                        $persen = ($jumlah_sisa > 0 && $material['stok_barang'] > 0)
-                                                            ? ($jumlah_sisa / $material['stok_barang']) * 100
-                                                            : 0;
-
-                                                        if ($jumlah_sisa == $material['stok_barang']) {
-                                                            $status = '<span class="badge badge-success">MASIH TERSEDIA</span>';
-                                                        } else if ($persen == 50) {
-                                                            $status = '<span class="badge badge-warning">SETENGAH</span>';
-                                                        } else if ($persen < 50 && $jumlah_sisa > 0) {
-                                                            $status = '<span class="badge badge-danger">PERLU DIRESTOK!</span>';
-                                                        } else if ($jumlah_sisa == 0) {
-                                                            $status = '<span class="badge badge-dark">HABIS</span>';
-                                                        } else {
-                                                            $status = '<span class="badge badge-primary">TERSEDIA SEBAGIAN</span>';
-                                                        }
-                                                    ?>
-                                                    <td><?= $jumlah_sisa ?></td>
-                                                    <td><?= $material['satuan_barang'] ?></td>
-                                                    <td><?= $status ?></td>
+                                                    <td><?= $material['nama_supplier'] ?></td>
+                                                    <td><?= $material['alamat_supplier'] ?></td>
+                                                    <td><?= $material['kontak_supplier'] ?></td>
+                                                    <td><?= $material['nama_pic'] ?></td>
+                                                    <td><?= $material['kontak_pic'] ?></td>
                                                     <td>
-                                                        <a class="btn btn-info btn-xs"
-                                                            href="edit-material.php?id=<?= $material['id'] ?>">
-                                                            <i class="fas fa-pencil-alt">
-                                                            </i>
-                                                            Edit
-                                                        </a>
-                                                        <a class="btn btn-danger btn-xs"
-                                                            href="hapus-material.php?id=<?= $material['id'] ?>">
-                                                            <i class="fas fa-trash">
-                                                            </i>
-                                                            Delete
-                                                        </a>
+                                                        <a href="edit-supplier.php?id=<?= $material['id_supplier'] ?>" class="btn btn-sm btn-primary">Edit</a>
+                                                        <a href="hapus-supplier.php?id=<?= $material['id_supplier'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">Hapus</a>
                                                     </td>
                                                 </tr>
                                             </tbody>

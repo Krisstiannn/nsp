@@ -9,7 +9,9 @@ $query_jumlahData = "SELECT
                             (SELECT COUNT(*) FROM karyawan) AS jumlah_dataKaryawan, 
                             (SELECT COUNT(*) FROM inventaris) AS jumlah_dataInventaris,
                             (SELECT COUNT(*) FROM material) AS jumlah_dataMaterial,
-                            (SELECT COUNT(*) FROM psb) AS jumlah_dataPsb";
+                            (SELECT COUNT(*) FROM psb) AS jumlah_dataPsb,
+                            (SELECT COUNT(*) FROM pelanggan) AS jumlah_dataPelanggan,
+                            (SELECT COUNT(*) FROM perbaikan) AS jumlah_dataPerbaikan";
 $result_jumlahData = $conn->query($query_jumlahData);
 $jumlah_data = $result_jumlahData->fetch_assoc();
 
@@ -105,7 +107,7 @@ $jumlah_data = $result_jumlahData->fetch_assoc();
                                     <div class="info-box-content">
                                         <span class="info-box-text text-red text-bold" style="font-size: 20px">JUMLAH
                                             PELANGGAN</span>
-                                        <span style="font-size: 30px">15</span>
+                                        <span style="font-size: 30px"><?= $jumlah_data['jumlah_dataPelanggan'] ?></span>
                                     </div>
                                 </div>
                             </a>
@@ -128,7 +130,7 @@ $jumlah_data = $result_jumlahData->fetch_assoc();
                                     <div class="info-box-content">
                                         <span class="info-box-text text-red text-bold"
                                             style="font-size: 20px">PERBAIKAN</span>
-                                        <span style="font-size: 30px">15</span>
+                                        <span style="font-size: 30px"><?= $jumlah_data['jumlah_dataPerbaikan'] ?></span>
                                     </div>
                                 </div>
                             </a>

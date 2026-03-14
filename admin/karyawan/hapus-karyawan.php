@@ -1,8 +1,8 @@
 <?php
 include "/xampp/htdocs/nsp/services/koneksi.php";
 
-$id = $_GET['id'];
-$query_hapus = "DELETE FROM `karyawan` WHERE id = '$id'";
+$nip_karyawan = $_GET['nip_karyawan'];
+$query_hapus = "DELETE FROM `users` WHERE username = '$nip_karyawan'";
 $result_hapus = $conn->query($query_hapus);
 
 if ($result_hapus) {

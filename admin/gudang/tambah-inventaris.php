@@ -6,13 +6,13 @@ $data = mysqli_fetch_assoc($data_kode);
 $kode_terakhir = $data['max_code'];
 
 if($kode_terakhir) {
-    $urutan = (int) substr($kode_terakhir, 3);
+    $urutan = (int) substr($kode_terakhir, 8);
     $urutan++;
 } else {
     $urutan = 1001;
 }
 
-$kode_barang = "NSP".$urutan;
+$kode_barang = "NSP-INV-".$urutan;
 
 if (isset($_POST['btn_submit'])) {
     //$kode_barang = $_POST['kode_barang'];
@@ -156,10 +156,6 @@ if (isset($_POST['btn_submit'])) {
                                         <option>Rusak</option>
                                     </select>
                                 </div>
-                                <!-- <div class="form-group">
-                                    <label for="jumlah">Jumlah</label>
-                                    <input type="text" class="form-control" name="jumlah_barang" placeholder="Jumlah">
-                                </div> -->
                                 <div class="form-group">
                                     <label>Tanggal Masuk Barang</label>
                                     <div class="input-group date" id="reservationdate" data-target-input="nearest">

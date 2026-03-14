@@ -2,35 +2,30 @@
 include "/xampp/htdocs/nsp/services/koneksi.php";
 
 $id = $_GET['id'];
-$query_tampilData = "SELECT * FROM material WHERE id = '$id'";
+$query_tampilData = "SELECT * FROM supplier WHERE id_supplier = '$id'";
 $result_tampilData = $conn->query($query_tampilData)->fetch_assoc();
 
 if (isset($_POST['btn_submit'])) {
-    $nama_barang = $_POST['nama_barang'];
-    $jumlah_restok = $_POST['jumlah_restok'];
-    $tanggal_masuk = $_POST['tanggal_masuk'];
-    if ($_FILES['gambar_barang']['name'] == "") {
-        $gambar_barang = $result_tampilData['gambar_barang'];
-    } else {
-        $gambar_barang = $_FILES['gambar_barang']['name'];
-        unlink("/xampp/htdocs/nsp/storage/img/" . $result_tampilData['gambar_barang']);
-        move_uploaded_file($_FILES['gambar_barang']['tmp_name'], "/xampp/htdocs/nsp/storage/img/" . $_FILES['gambar_barang']['name']);
-    }
-
-    $query_editData = "UPDATE material SET gambar_barang = '$gambar_barang', nama_barang = '$nama_barang', 
-                       stok_barang = stok_barang + '$jumlah_restok', tanggal_masuk = '$tanggal_masuk'
-                       WHERE id = '$id'";
+    $nama_supplier = $_POST['nama_supplier'];
+    $alamat_supplier = $_POST['alamat_supplier'];
+    $kontak_supplier = $_POST['kontak_supplier'];
+    $nama_pic = $_POST['nama_pic'];
+    $kontak_pic = $_POST['kontak_pic'];
+    
+    $query_editData = "UPDATE supplier SET nama_supplier = '$nama_supplier', alamat_supplier = '$alamat_supplier', 
+                       kontak_supplier = '$kontak_supplier', nama_pic = '$nama_pic', kontak_pic = '$kontak_pic'
+                       WHERE id_supplier = '$id'";
     $result_editData = $conn->query($query_editData);
 
     if ($result_editData) {
         echo "<script type= 'text/javascript'>
                 alert('Data Berhasil dirubah!');
-                document.location.href = 'material.php';
+                document.location.href = 'supplier.php';
             </script>";
     } else {
         echo "<script type= 'text/javascript'>
                 alert('Data Gagal dirubah!');
-                document.location.href = 'edit-material.php?id=$id';
+                document.location.href = 'edit-supplier.php?id=$id';
             </script>";
     }
 }
@@ -41,7 +36,7 @@ if (isset($_POST['btn_submit'])) {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Gudang | Material</title>
+    <title>Supplier</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -71,7 +66,7 @@ if (isset($_POST['btn_submit'])) {
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1>Edit Data Material</h1>
+                            <h1>Edit Data Supplier</h1>
                         </div>
                     </div>
                 </div>
@@ -81,55 +76,36 @@ if (isset($_POST['btn_submit'])) {
                 <div class="content-fluid">
                     <div class="card card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">Edit Data Barang</h3>
+                            <h3 class="card-title">Edit Data Supplier</h3>
                         </div>
-                        <form method="POST" action="edit-material.php?id=<?= $result_tampilData['id'] ?>"
+                        <form method="POST" action="edit-supplier.php?id=<?= $result_tampilData['id_supplier'] ?>"
                             enctype="multipart/form-data">
                             <div class="card-body">
                                 <div class="form-group">
-                                    <label for="kode">Kode Barang</label>
-                                    <input type="text" class="form-control" name="kode_barang" placeholder="Kode Barang"
-                                        value="<?= $result_tampilData['kode_barang'] ?>" disabled>
+                                    <label for="nama">Nama Supplier</label>
+                                    <input type="text" class="form-control" name="nama_supplier"
+                                        placeholder="Masukkan Nama Supplier"
+                                        value="<?= $result_tampilData['nama_supplier'] ?>">
+                                </div>
+                               <div class="form-group">
+                                    <label for="alamat">Alamat Supplier</label>
+                                    <input type="text" class="form-control" name="alamat_supplier"
+                                        placeholder="Masukkan Alamat Supplier" value="<?= $result_tampilData['alamat_supplier'] ?>">
                                 </div>
                                 <div class="form-group">
-                                    <label for="gambar">Gambar Barang</label>
-                                    <div class="input-group">
-                                        <div class="custom-file">
-                                            <input type="file" class="custom-file-input" name="gambar_barang"
-                                                accept="image/*" value="<?= $result_tampilData['gambar_barang'] ?>">
-                                            <label class="custom-file-label"
-                                                for="foto"><?= $result_tampilData['gambar_barang'] ?></label>
-                                        </div>
-                                    </div>
+                                    <label for="kontak">Kontak Supplier</label>
+                                    <input type="text" class="form-control" name="kontak_supplier"
+                                        placeholder="Masukkan Kontak Supplier" value="<?= $result_tampilData['kontak_supplier'] ?>">
                                 </div>
                                 <div class="form-group">
-                                    <label for="nama">Nama Barang</label>
-                                    <input type="text" class="form-control" name="nama_barang"
-                                        placeholder="Masukkan Nama Barang"
-                                        value="<?= $result_tampilData['nama_barang'] ?>">
+                                    <label for="nama_pic">Nama PIC</label>
+                                    <input type="text" class="form-control" name="nama_pic"
+                                        placeholder="Masukkan Nama PIC" value="<?= $result_tampilData['nama_pic'] ?>">
                                 </div>
                                 <div class="form-group">
-                                    <label for="jumlah">Jumlah Restok Barang</label>
-                                    <input type="text" class="form-control" name="jumlah_restok"
-                                        placeholder="Jumlah Restok Barang">
-                                </div>
-                                <div class="form-group">
-                                    <label for="satuan">Satuan Barang</label>
-                                    <select class="custom-select" name="satuan_barang" disabled>
-                                        <option><?= $result_tampilData['satuan_barang'] ?></option>
-                                        <option>UNIT</option>
-                                        <option>PCS</option>
-                                        <option>BUAH</option>
-                                        <option>METER</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Tanggal Masuk Barang</label>
-                                    <div class="input-group date" id="reservationdate" data-target-input="nearest">
-                                        <input type="date" class="form-control datetimepicker-input"
-                                            data-target="#reservationdate" name="tanggal_masuk"
-                                            value="<?= $result_tampilData['tanggal_masuk'] ?>" />
-                                    </div>
+                                    <label for="kontak_pic">Kontak PIC</label>
+                                    <input type="text" class="form-control" name="kontak_pic"
+                                        placeholder="Masukkan Kontak PIC" value="<?= $result_tampilData['kontak_pic'] ?>">
                                 </div>
                             </div>
                             <div class="card-footer">

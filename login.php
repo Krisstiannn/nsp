@@ -5,68 +5,91 @@ include "./helpers/billing_helper.php";
 date_default_timezone_set('Asia/Makassar');
 
 $notifikasi_login = "";
-if (isset($_POST['btn_login'])) {
-    $username = htmlspecialchars(trim($_POST['username']));
-    $password = htmlspecialchars(trim($_POST['password']));
 
-    $query_users = "SELECT users.id_users, users.username, users.password, users.peran, 
-                           karyawan.nip_karyawan, karyawan.nama_karyawan, karyawan.id, 
+if (isset($_POST['btn_login'])) {
+
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
+
+    $query_users = "SELECT users.id_users, users.username, users.password, users.peran,
+                           karyawan.nip_karyawan, karyawan.nama_karyawan, karyawan.id,
                            pelanggan.nama_pelanggan, pelanggan.id_langganan
-                FROM users 
-                LEFT JOIN karyawan ON users.username = karyawan.nip_karyawan
-                LEFT JOIN pelanggan ON users.id_users = pelanggan.id_user
-                WHERE users.username = '$username' AND users.password = '$password'";
-    $result_users = $conn->query($query_users);
+                    FROM users
+                    LEFT JOIN karyawan ON users.username = karyawan.nip_karyawan
+                    LEFT JOIN pelanggan ON users.id_users = pelanggan.id_user
+                    WHERE users.username = ?";
+
+    $stmt = $conn->prepare($query_users);
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result_users = $stmt->get_result();
 
     if ($result_users->num_rows > 0) {
+
         $data_login = $result_users->fetch_assoc();
-        $_SESSION['id_users'] = $data_login['id_users'];
-        $_SESSION['username'] = $data_login['username'];
-        $_SESSION["peran"] = $data_login["peran"];
-        if ($_SESSION["peran"] === "admin") {
-            $_SESSION['id_karyawan'] = $data_login['id'];
-            $_SESSION['nip'] = $data_login['nip_karyawan'];
-            $_SESSION['nama_karyawan'] = $data_login['nama_karyawan'];
-            header("location: ./admin/index.php");
-            exit();
-        } else if ($_SESSION["peran"] === "teknisi") {
-            $_SESSION['id_karyawan'] = $data_login['id'];
-            $_SESSION['nip'] = $data_login['nip_karyawan'];
-            $_SESSION['nama_karyawan'] = $data_login['nama_karyawan'];
-            header("location: ./user/index.php");
-            exit();
-        } else if ($_SESSION["peran"] === "pelanggan") {
-            $_SESSION['nama_pelanggan'] = $data_login['nama_pelanggan'] ?? '';
-            $_SESSION['id_langganan']   = $data_login['id_langganan'] ?? null;   // <-- WAJIB
 
-            $idUserLogin = (int)$_SESSION['id_users'];
-            $idLangLogin = (string)($_SESSION['id_langganan'] ?? '');
+        // cek password hash
+        if (password_verify($password, $data_login['password'])) {
 
-            if (!empty($idLangLogin)) {
-                // 1) buat tagihan bulan ini jika belum ada
-                $resultBilling = handleBillingOnLogin($conn, $idUserLogin, $idLangLogin);
-                if (!empty($resultBilling['notif'])) {
-                    $_SESSION['notif_tagihan'] = $resultBilling['notif'];
-                } else {
-                    unset($_SESSION['notif_tagihan']);
+            $_SESSION['id_users'] = $data_login['id_users'];
+            $_SESSION['username'] = $data_login['username'];
+            $_SESSION["peran"] = $data_login["peran"];
+
+            if ($_SESSION["peran"] === "admin") {
+
+                $_SESSION['id_karyawan'] = $data_login['id'];
+                $_SESSION['nip'] = $data_login['nip_karyawan'];
+                $_SESSION['nama_karyawan'] = $data_login['nama_karyawan'];
+
+                header("location: ./admin/index.php");
+                exit();
+
+            } else if ($_SESSION["peran"] === "teknisi") {
+
+                $_SESSION['id_karyawan'] = $data_login['id'];
+                $_SESSION['nip'] = $data_login['nip_karyawan'];
+                $_SESSION['nama_karyawan'] = $data_login['nama_karyawan'];
+
+                header("location: ./user/index.php");
+                exit();
+
+            } else if ($_SESSION["peran"] === "pelanggan") {
+
+                $_SESSION['nama_pelanggan'] = $data_login['nama_pelanggan'] ?? '';
+                $_SESSION['id_langganan']   = $data_login['id_langganan'] ?? null;
+
+                $idUserLogin = (int)$_SESSION['id_users'];
+                $idLangLogin = (string)($_SESSION['id_langganan'] ?? '');
+
+                if (!empty($idLangLogin)) {
+
+                    $resultBilling = handleBillingOnLogin($conn, $idUserLogin, $idLangLogin);
+
+                    if (!empty($resultBilling['notif'])) {
+                        $_SESSION['notif_tagihan'] = $resultBilling['notif'];
+                    } else {
+                        unset($_SESSION['notif_tagihan']);
+                    }
+
+                    $iso = applyIsolationStatus($conn, $idUserLogin, $idLangLogin);
+
+                    $_SESSION['isolir'] = $iso['isolir'];
+
+                    if (!empty($iso['notif'])) {
+                        $_SESSION['notif_isolir'] = $iso['notif'];
+                    } else {
+                        unset($_SESSION['notif_isolir']);
+                    }
                 }
 
-                // 2) cek & terapkan isolir
-                $iso = applyIsolationStatus($conn, $idUserLogin, $idLangLogin);
-                $_SESSION['isolir'] = $iso['isolir'];
-                if (!empty($iso['notif'])) {
-                    $_SESSION['notif_isolir'] = $iso['notif'];
-                } else {
-                    unset($_SESSION['notif_isolir']);
-                }
+                header("Location: /nsp/pelanggan/dashboard.php");
+                exit;
             }
 
-            // redirect ke dashboard pelanggan
-            header("Location: /nsp/pelanggan/dashboard.php");
-            exit;
         } else {
             $notifikasi_login = "USERNAME ATAU PASSWORD SALAH!!!";
         }
+
     } else {
         $notifikasi_login = "USERNAME ATAU PASSWORD SALAH!!!";
     }

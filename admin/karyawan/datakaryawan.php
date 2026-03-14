@@ -107,7 +107,7 @@ $result_akunKaryawan = $conn->query($query_akunKaryawan);
                                                                 Edit
                                                             </a>
                                                             <a class="btn btn-danger btn-sm"
-                                                                href="hapus-karyawan.php?id=<?= $karyawan["id"] ?>"
+                                                                href="hapus-karyawan.php?nip_karyawan=<?= $karyawan["nip_karyawan"] ?>"
                                                                 onClick="javascript: return confirm('Apakah yakin ingin menghapus data ini?');">
                                                                 <i class="fas fa-trash">
                                                                 </i>

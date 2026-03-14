@@ -50,6 +50,15 @@ if (isset($_POST['btn_logout'])) {
                     </ul>
                 </li>
                 <li class="nav-item ">
+                    <a href="/nsp/admin/supplier/supplier.php" class="nav-link">
+                        <ion-icon name="people-circle-outline" class="far nav-icon"></ion-icon>
+                        <p class="text-light">
+                            Supplier
+                            <i class="right fas"></i>
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item ">
                     <a href="#" class="nav-link">
                         <ion-icon name="people-outline" class="far nav-icon"></ion-icon>
                         <p class="text-light">
