@@ -51,7 +51,7 @@ if (isset($_POST['btn_logout'])) {
                 </li>
                 <li class="nav-item ">
                     <a href="/nsp/admin/supplier/supplier.php" class="nav-link">
-                        <ion-icon name="people-circle-outline" class="far nav-icon"></ion-icon>
+                        <ion-icon name="cart-outline" class="far nav-icon"></ion-icon>
                         <p class="text-light">
                             Supplier
                             <i class="right fas"></i>
@@ -60,7 +60,7 @@ if (isset($_POST['btn_logout'])) {
                 </li>
                 <li class="nav-item ">
                     <a href="/nsp/admin/nota/nota.php" class="nav-link">
-                        <ion-icon name="people-circle-outline" class="far nav-icon"></ion-icon>
+                        <ion-icon name="receipt-outline" class="far nav-icon"></ion-icon>
                         <p class="text-light">
                             Nota
                             <i class="right fas"></i>

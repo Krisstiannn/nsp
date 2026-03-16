@@ -15,13 +15,14 @@ $queryPelanggan = "SELECT * FROM psb WHERE id_user = '$id_user' ORDER BY id DESC
 $resultPelanggan = $conn->query($queryPelanggan);
 if ($resultPelanggan->num_rows === 0) {
     $id_langganan = $paket = $teknisi = $status = '-';
+    $sudah_rating = false;
 } else {
     $dataPelanggan = $resultPelanggan->fetch_assoc();
     $id_langganan = $dataPelanggan['id_langganan'];
     $paket = $dataPelanggan['paket_internet'];
 
     $id_pelanggan = $dataPelanggan['id'];
-    $queryWO = "SELECT * FROM wo WHERE id_psb = '$id_pelanggan'";
+    $queryWO = "SELECT * FROM wo WHERE id_psb = '$id_pelanggan' LIMIT 1";
     $resultWO = $conn->query($queryWO);
 
     if ($resultWO->num_rows > 0) {
@@ -38,7 +39,49 @@ if ($resultPelanggan->num_rows === 0) {
     $queryReport = "SELECT status FROM report_pemasangan WHERE id_langganan = '$id_langganan'";
     $resultReport = $conn->query($queryReport);
     $status = $resultReport->num_rows > 0 ? $resultReport->fetch_assoc()['status'] : 'Tiket Sudah Diberikan Ke Teknisi';
+
+    // Cek apakah pelanggan sudah memberi rating
+    $sudah_rating = false;
+
+    if (isset($dataWO['id'])) {
+        $id_wo = $dataWO['id'];
+
+        $cekRating = "SELECT id_rating FROM rating_teknisi WHERE id_wo = '$id_wo'";
+        $resultRating = $conn->query($cekRating);
+
+        if ($resultRating->num_rows > 0) {
+            $sudah_rating = true;
+        }
+    }
+
 }
+
+if (isset($_POST['simpan_rating']) && isset($id_wo)) {
+
+    $rating = $_POST['rating'];
+    $komentar = $_POST['komentar'];
+
+    $insert = "INSERT INTO rating_teknisi 
+               (id_wo, id_teknisi, id_langganan, rating, komentar)
+               VALUES 
+               ('$id_wo', '$id_teknisi', '$id_langganan', '$rating', '$komentar')";
+
+    if ($conn->query($insert)) {
+
+        echo "<script>
+        alert('Terima kasih atas penilaian Anda');
+        location.reload();
+        </script>";
+
+    } else {
+
+        echo "<script>
+        alert('Gagal menyimpan rating');
+        </script>";
+
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -51,6 +94,29 @@ if ($resultPelanggan->num_rows === 0) {
     <link rel="stylesheet" href="/nsp/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
     <link rel="stylesheet" href="/nsp/dist/css/adminlte.min.css">
 </head>
+<style>
+    .rating {
+        direction: rtl;
+        font-size: 35px;
+        unicode-bidi: bidi-override;
+    }
+
+    .rating input {
+        display: none;
+    }
+
+    .rating label {
+        color: #ccc;
+        cursor: pointer;
+    }
+
+    .rating input:checked~label,
+    .rating label:hover,
+    .rating label:hover~label {
+        color: #ffc107;
+    }
+</style>
+
 
 <body class="hold-transition layout-top-nav">
     <div class="wrapper">
@@ -89,15 +155,82 @@ if ($resultPelanggan->num_rows === 0) {
                                             <b>Paket Internet</b> <span class="float-right"><?= $paket ?></span>
                                         </li>
                                         <li class="list-group-item">
-                                            <b>Teknisi Yang Mengerjakan</b> <span class="float-right"><?= $teknisi ?></span>
+                                            <b>Teknisi Yang Mengerjakan</b> <span
+                                                class="float-right"><?= $teknisi ?></span>
                                         </li>
                                         <li class="list-group-item">
                                             <b>Status Pemasangan</b> <span class="float-right"><?= $status ?></span>
                                         </li>
                                     </ul>
+
+                                    <?php if ($status == 'selesai' && !$sudah_rating) { ?>
+                                    <div class="text-center mt-3">
+                                        <button class="btn btn-success" data-toggle="modal" data-target="#modalRating">
+                                            Beri Rating Teknisi
+                                        </button>
+                                    </div>
+                                    <?php } elseif ($sudah_rating) { ?>
+                                    <div class="text-center mt-3 text-success">
+                                        <b>Terima kasih, Anda sudah memberi rating.</b>
+                                    </div>
+                                    <?php } ?>
+
                                 </div>
                             </div>
                         </div>
+
+                        <div class="modal fade" id="modalRating">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+
+                                    <form method="POST">
+
+                                        <div class="modal-header">
+                                            <h4 class="modal-title">Rating Teknisi</h4>
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        </div>
+
+                                        <div class="modal-body text-center">
+
+                                            <label>Berikan Penilaian</label>
+
+                                            <div class="rating">
+                                                <input type="radio" name="rating" value="5" id="star5">
+                                                <label for="star5">★</label>
+
+                                                <input type="radio" name="rating" value="4" id="star4">
+                                                <label for="star4">★</label>
+
+                                                <input type="radio" name="rating" value="3" id="star3">
+                                                <label for="star3">★</label>
+
+                                                <input type="radio" name="rating" value="2" id="star2">
+                                                <label for="star2">★</label>
+
+                                                <input type="radio" name="rating" value="1" id="star1" required>
+                                                <label for="star1">★</label>
+                                            </div>
+
+
+                                            <br>
+
+                                            <textarea name="komentar" class="form-control"
+                                                placeholder="Komentar (opsional)"></textarea>
+
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="submit" name="simpan_rating" class="btn btn-primary">
+                                                Kirim Rating
+                                            </button>
+                                        </div>
+
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

@@ -96,9 +96,20 @@ $result_tampilData = $conn->query($query_tampilData);
                                                     <td><?= $material['nama_pic'] ?></td>
                                                     <td><?= $material['kontak_pic'] ?></td>
                                                     <td>
-                                                        <a href="edit-supplier.php?id=<?= $material['id_supplier'] ?>" class="btn btn-sm btn-primary">Edit</a>
-                                                        <a href="hapus-supplier.php?id=<?= $material['id_supplier'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">Hapus</a>
-                                                    </td>
+                                                            <a class="btn btn-info btn-sm"
+                                                                href="edit-supplier.php?id=<?= $material['id_supplier'] ?>"">
+                                                                <i class="fas fa-pencil-alt">
+                                                                </i>
+                                                                Edit
+                                                            </a>
+                                                            <a class="btn btn-danger btn-sm"
+                                                                href="hapus-supplier.php?id=<?= $material['id_supplier'] ?>""
+                                                                onClick="javascript: return confirm('Apakah yakin ingin menghapus data ini?');">
+                                                                <i class="fas fa-trash">
+                                                                </i>
+                                                                Delete
+                                                            </a>
+                                                        </td>
                                                 </tr>
                                             </tbody>
                                             <?php } ?>

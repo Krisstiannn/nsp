@@ -58,6 +58,8 @@ $result_tampilData = $conn->query($query_tampilData);
                                         <div class="card-title">
                                             <a href="tambah-material.php" class="btn btn-sm btn-success ">Tambah
                                                 Data</a>
+
+                                                <a href="restok-massal.php" class="btn btn-sm btn-info ">Restok Massal</a>
                                         </div>
 
                                         <div class="card-title float-right">

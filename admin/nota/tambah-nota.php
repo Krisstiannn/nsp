@@ -86,9 +86,9 @@ if (isset($_POST['btn_submit'])) {
 
                 $queryDetail = "
                     INSERT INTO detail_nota
-                    (id_nota,no_nota,nama_barang,jumlah_barang,tanggal_masuk,kode_barang)
+                    (id_nota,no_nota,nama_barang,jumlah_barang,tanggal_masuk,kode_barang,satuan)
                     VALUES
-                    ('$id_nota','$no_nota','$nama_barang','$jumlah_barang','$tanggal','$kode_barang')
+                    ('$id_nota','$no_nota','$nama_barang','$jumlah_barang','$tanggal','$kode_barang', '$satuan')
                 ";
 
                 if(!mysqli_query($conn,$queryDetail)){
@@ -269,10 +269,11 @@ function tambahBarang() {
     <div class="col-md-2">
         <select class="form-control satuan-barang" name="satuan[]" required>
             <option value="">-- Satuan --</option>
-            <option value="pcs">Pcs</option>
-            <option value="meter">Meter</option>
-            <option value="box">Box</option>
-            <option value="roll">Roll</option>
+            <option value="pcs">PCS</option>
+            <option value="meter">METER</option>
+            <option value="box">BOX</option>
+            <option value="unit">UNIT</option>
+            <option value="buah">BUAH</option>
         </select>
     </div>
 
