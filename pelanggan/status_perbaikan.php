@@ -1,12 +1,58 @@
 <?php
 session_start();
 include "/xampp/htdocs/nsp/services/koneksi.php";
-
 $id_user = $_SESSION['id_users'];
 $nama_pelanggan = $_SESSION['nama_pelanggan'];
 
 $queryPelanggan = "SELECT * FROM perbaikan WHERE id_user = '$id_user' ORDER BY id_perbaikan DESC";
 $resultPelanggan = $conn->query($queryPelanggan);
+
+$id_pelanggan = $resultPelanggan->fetch_assoc();
+$id_pelanggan = $id_pelanggan['id_berlangganan'];
+
+if(isset($_POST['submit_rating'])){
+
+    $id_teknisi = $_POST['id_teknisi'];
+    $id_tiket = $_POST['id_tiket'];
+    $rating = $_POST['rating'];
+    $komentar = $_POST['komentar'];
+
+    $cek = $conn->query("
+        SELECT id_rating
+        FROM rating_teknisi 
+        WHERE id_wo='$id_tiket'
+        ");
+
+
+    if($cek->num_rows > 0){
+        header("Location: ".$_SERVER['PHP_SELF']);
+        exit;
+    }
+
+
+    $insert = "
+    INSERT INTO rating_teknisi 
+    (id_wo,id_teknisi,id_langganan,rating,komentar)
+    VALUES
+    ('$id_tiket','$id_teknisi','$id_pelanggan','$rating','$komentar')";
+
+    if($conn->query($insert)){
+
+        header("Location: ".$_SERVER['PHP_SELF']."?rating=success");
+        exit;
+
+        }else{
+
+        echo "<script>alert('Gagal menyimpan rating');</script>";
+
+    }
+
+}
+
+if(isset($_GET['rating']) && $_GET['rating']=="success"){
+echo "<script>alert('Terima kasih atas penilaian Anda');</script>";
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -45,49 +91,129 @@ $resultPelanggan = $conn->query($queryPelanggan);
                                             <th>Keluhan</th>
                                             <th>Teknisi</th>
                                             <th>Status</th>
+                                            <th>Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
-                    $no = 1;
-                    while ($dataPelanggan = $resultPelanggan->fetch_assoc()) {
-                      $id_langganan = $dataPelanggan['id_berlangganan'];
-                      $keluhan = $dataPelanggan['keluhan'];
-                      $id_perbaikan = $dataPelanggan['id_perbaikan'];
+                                            $no = 1;
+                                            while ($dataPelanggan = $resultPelanggan->fetch_assoc()) {
+                                                $id_langganan = $dataPelanggan['id_berlangganan'];
+                                                $keluhan = $dataPelanggan['keluhan'];
+                                                $id_perbaikan = $dataPelanggan['id_perbaikan'];
 
-                      $teknisi = '-';
-                      $status = 'Tiket Sudah Diberikan Ke Teknisi';
+                                                $teknisi = '-';
+                                                $id_teknisi = 0;
+                                                $status = 'Tiket Sudah Diberikan Ke Teknisi';
 
-                      $queryWO = "SELECT * FROM wo WHERE id_perbaikan = '$id_perbaikan'";
-                      $resultWO = $conn->query($queryWO);
+                                                $queryWO = "SELECT * FROM wo WHERE id_perbaikan = '$id_perbaikan'";
+                                                $resultWO = $conn->query($queryWO);
 
-                      if ($resultWO->num_rows > 0) {
-                        $dataWO = $resultWO->fetch_assoc();
-                        $id_teknisi = $dataWO['id_karyawan'];
+                                                if ($resultWO->num_rows > 0) {
+                                                    $dataWO = $resultWO->fetch_assoc();
+                                                    $id_teknisi = $dataWO['id_karyawan'];
 
-                        $queryTeknisi = "SELECT nama_karyawan FROM karyawan WHERE id = '$id_teknisi'";
-                        $resultTeknisi = $conn->query($queryTeknisi);
-                        if ($resultTeknisi->num_rows > 0) {
-                          $teknisi = $resultTeknisi->fetch_assoc()['nama_karyawan'];
-                        }
-                      }
+                                                    $queryTeknisi = "SELECT nama_karyawan FROM karyawan WHERE id = '$id_teknisi'";
+                                                    $resultTeknisi = $conn->query($queryTeknisi);
+                                                    if ($resultTeknisi->num_rows > 0) {
+                                                    $teknisi = $resultTeknisi->fetch_assoc()['nama_karyawan'];
+                                                    }
+                                                }
 
-                      $queryReport = "SELECT status FROM report_perbaikan WHERE no_wo = '$id_perbaikan' ORDER BY id DESC LIMIT 1";
-                      $resultReport = $conn->query($queryReport);
-                      if ($resultReport->num_rows > 0) {
-                        $status = $resultReport->fetch_assoc()['status'];
-                      } 
+                                                $queryReport = "SELECT status FROM report_perbaikan WHERE no_wo = '$id_perbaikan' ORDER BY id DESC LIMIT 1";
+                                                $resultReport = $conn->query($queryReport);
+                                                if ($resultReport->num_rows > 0) {
+                                                    $status = $resultReport->fetch_assoc()['status'];
+                                                } 
 
-                      echo "<tr>
-                              <td>$no</td>
-                              <td>$id_langganan</td>
-                              <td>$keluhan</td>
-                              <td>$teknisi</td>
-                              <td>$status</td>
-                            </tr>";
-                      $no++;
-                    }
-                    ?>
+                                                $ratingButton = "-";
+
+                                                if ($status == "SELESAI") {
+
+                                                    $cekRating = $conn->query("
+                                                                SELECT *
+                                                                FROM rating_teknisi 
+                                                                WHERE id_wo='$id_perbaikan'
+                                                                ");
+
+
+                                                    if ($cekRating && $cekRating->num_rows == 0) {
+
+                                                        $ratingButton = "
+                                                        <button class='btn btn-sm btn-success'
+                                                        data-toggle='modal'
+                                                        data-target='#ratingModal$id_perbaikan'>
+                                                        Beri Rating
+                                                        </button>";
+
+                                                    } else {
+
+                                                        $ratingButton = "<span class='badge badge-success'>Sudah Dinilai</span>";
+
+                                                    }
+                                                }
+
+                                                echo "<tr>
+                                                        <td>$no</td>
+                                                        <td>$id_langganan</td>
+                                                        <td>$keluhan</td>
+                                                        <td>$teknisi</td>
+                                                        <td>$status</td>
+                                                        <td>$ratingButton</td>
+                                                    </tr>";
+
+                                                if ($status == "SELESAI") {
+                                                    echo "
+
+                                                    <div class='modal fade' id='ratingModal$id_perbaikan'>
+                                                    <div class='modal-dialog'>
+                                                    <div class='modal-content'>
+
+                                                    <form method='POST'>
+
+                                                    <div class='modal-header'>
+                                                    <h5 class='modal-title'>Rating Teknisi</h5>
+                                                    <button type='button' class='close' data-dismiss='modal'>&times;</button>
+                                                    </div>
+
+                                                    <div class='modal-body'>
+
+                                                    <input type='hidden' name='id_teknisi' value='$id_teknisi'>
+                                                    <input type='hidden' name='id_tiket' value='$id_perbaikan'>
+
+                                                    <label>Rating</label>
+                                                    <select name='rating' class='form-control' required>
+                                                    <option value=''>Pilih</option>
+                                                    <option value='5'>⭐⭐⭐⭐⭐ Sangat Puas</option>
+                                                    <option value='4'>⭐⭐⭐⭐ Puas</option>
+                                                    <option value='3'>⭐⭐⭐ Cukup</option>
+                                                    <option value='2'>⭐⭐ Kurang</option>
+                                                    <option value='1'>⭐ Buruk</option>
+                                                    </select>
+
+                                                    <label class='mt-2'>Komentar</label>
+                                                    <textarea name='komentar' class='form-control'></textarea>
+
+                                                    </div>
+
+                                                    <div class='modal-footer'>
+                                                    <button type='submit' name='submit_rating' class='btn btn-primary'>
+                                                    Kirim Rating
+                                                    </button>
+                                                    </div>
+
+                                                    </form>
+
+                                                    </div>
+                                                    </div>
+                                                    </div>
+
+                                                    ";
+                                                }
+
+                                                $no++;
+                                            }
+                                        ?>
                                     </tbody>
                                 </table>
                             </div>

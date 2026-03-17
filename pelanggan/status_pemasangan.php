@@ -70,7 +70,7 @@ if (isset($_POST['simpan_rating']) && isset($id_wo)) {
 
         echo "<script>
         alert('Terima kasih atas penilaian Anda');
-        location.reload();
+        document.location.href = status_pemasangan.php;
         </script>";
 
     } else {
@@ -79,7 +79,8 @@ if (isset($_POST['simpan_rating']) && isset($id_wo)) {
         alert('Gagal menyimpan rating');
         </script>";
 
-    }
+}
+
 }
 
 ?>
@@ -163,7 +164,7 @@ if (isset($_POST['simpan_rating']) && isset($id_wo)) {
                                         </li>
                                     </ul>
 
-                                    <?php if ($status == 'selesai' && !$sudah_rating) { ?>
+                                    <?php if ($status == 'SELESAI' && !$sudah_rating) { ?>
                                     <div class="text-center mt-3">
                                         <button class="btn btn-success" data-toggle="modal" data-target="#modalRating">
                                             Beri Rating Teknisi

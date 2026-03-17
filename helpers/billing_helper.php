@@ -36,27 +36,41 @@ function handleBillingOnLogin(mysqli $conn, int $idUser, string $idLangganan): a
     $jatuhTempo = $bulanIni . '-15';  // 2025-08-15
     $today      = date('Y-m-d');
 
-    // sebelum bikin tagihan
-    $st = $conn->prepare("SELECT status_pelanggan FROM pelanggan WHERE id_user=? AND id_langganan=? LIMIT 1");
-    $st->bind_param("is", $idUser, $idLangganan);
+    $st = $conn->prepare("
+    SELECT status_pelanggan 
+    FROM pelanggan 
+    WHERE id_user=? AND id_langganan=? 
+    LIMIT 1
+    ");
+
+    if(!$st){
+        die("SQL ERROR: ".$conn->error);
+    }
+
+    $st->bind_param("ii", $idUser, $idLangganan);
     $st->execute();
     $st->bind_result($status);
     $st->fetch();
     $st->close();
 
     if ($status !== 'AKTIF') {
-    return ['notif' => "Layanan Anda tidak aktif. Tidak ada tagihan baru yang dibuat."];
+        return ['dibuat' => false, 'notif' => "Layanan Anda tidak aktif. Tidak ada tagihan baru yang dibuat."];
     }
 
 
-    // 1) cek: sudah ada tagihan bulan ini?
+
     $cek = $conn->prepare("SELECT 1 FROM pembayaran WHERE id_langganan=? AND bulan_tagihan=?");
-    $cek->bind_param("ss", $idLangganan, $tanggal01);
+
+    if(!$cek){
+        die("SQL ERROR: ".$conn->error);
+    }
+
+    $cek->bind_param("is", $idLangganan, $tanggal01);
     $cek->execute();
     $cek->store_result();
     $sudahAda = ($cek->num_rows > 0);
     $cek->close();
-
+    
     $dibuatBaru = false;
 
     // 2) kalau belum ada → buat
@@ -134,11 +148,17 @@ function applyIsolationStatus(mysqli $conn, int $idUser, string $idLangganan): a
     } else {
         // tidak ada tunggakan -> aktifkan bila sebelumnya ISOLIR
         $u = $conn->prepare("
-            UPDATE pelanggan 
-            SET status_pelanggan = 'AKTIF'
-            WHERE id_user = ? AND id_langganan = ? AND status_pelanggan = 'ISOLIR'
+        UPDATE pelanggan 
+        SET status_pelanggan = 'ISOLIR'
+        WHERE id_user = ? AND id_langganan = ? AND status_pelanggan <> 'TIDAK AKTIF'
         ");
+
+        if(!$u){
+            die("SQL ERROR: ".$conn->error);
+        }
+
         $u->bind_param("is", $idUser, $idLangganan);
+
         $u->execute();
         $u->close();
 
