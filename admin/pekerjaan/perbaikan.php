@@ -2,7 +2,28 @@
 include "/xampp/htdocs/nsp/services/koneksi.php";
 $tampil_data = "SELECT * FROM perbaikan";
 $result_tampilData = $conn->query($tampil_data);
-$result_tampilkaryawan = $conn->query("SELECT * FROM karyawan WHERE posisi_karyawan = 'teknisi'");
+$query_teknisi = "
+    SELECT 
+        k.id,
+        k.nama_karyawan,
+        COUNT(w.id) AS jumlah_tiket
+    FROM karyawan k
+    LEFT JOIN wo w ON k.id = w.id_karyawan
+    WHERE k.posisi_karyawan = 'teknisi'
+    GROUP BY k.id
+    ORDER BY jumlah_tiket ASC
+";
+
+$result_teknisi = $conn->query($query_teknisi);
+
+if(!$result_teknisi){
+    die("Query Error: " . $conn->error);
+}
+
+$data_teknisi = [];
+while($row = mysqli_fetch_assoc($result_teknisi)){
+    $data_teknisi[] = $row;
+}
 
 if (isset($_POST['btn_kirim'])) {
     $id_perbaikan = $_POST['id_perbaikan'];
@@ -11,12 +32,23 @@ if (isset($_POST['btn_kirim'])) {
 
     $cek_karyawan = $conn->query("SELECT * FROM karyawan WHERE id = '$id_karyawan'");
     $cek_pekerjaan = $conn->query("SELECT * FROM perbaikan WHERE id_perbaikan = '$id_perbaikan'");
-    $cek = $conn->query("SELECT * FROM wo WHERE id_perbaikan = '$id_perbaikan'")->fetch_assoc();
+    $cek = $conn->query("SELECT * FROM wo WHERE id_perbaikan = '$id_perbaikan'");
 
-    if ($cek > 0) {
+    if ($cek->num_rows > 0) {
         echo "<script>alert('Pekerjaan Sudah Di Kirimkan Ke Karyawan!'); window.location.href='psb.php';</script>";
         die();
     } else if ($cek_karyawan->num_rows > 0 && $cek_pekerjaan->num_rows > 0) {
+        $cek_beban = $conn->query("
+            SELECT COUNT(*) as total 
+            FROM wo 
+            WHERE id_karyawan = '$id_karyawan'
+        ")->fetch_assoc();
+
+        if($cek_beban['total'] >= 5){
+            echo "<script>alert('Teknisi sudah penuh!'); window.history.back();</script>";
+            die();
+        }
+
         $query_insert = "INSERT INTO wo (id_karyawan, id_perbaikan) VALUES ('$id_karyawan', '$id_perbaikan')";
         if ($conn->query($query_insert)) {
             echo "<script>alert('Pekerjaan berhasil dikirim ke karyawan!'); window.location.href='perbaikan.php';</script>";
@@ -124,12 +156,60 @@ if (isset($_POST['btn_kirim'])) {
                                                         <form action="perbaikan.php" method="POST">
                                                                 <input type="hidden" name="id_perbaikan"
                                                                     value="<?= $perbaikan['id_perbaikan'] ?>">
-                                                                <select name="id_karyawan">
-                                                                    <?php foreach ($result_tampilkaryawan as $karyawan) { ?>
-                                                                        <option value="<?= $karyawan['id'] ?>">
-                                                                            <?= $karyawan['nama_karyawan'] ?></option>
-                                                                    <?php } ?>
+                                                                <select name="id_karyawan" class="form-control form-control-sm">
+                                                                    <?php 
+                                                                    $max_tiket = 5;
+
+                                                                    foreach ($data_teknisi as $karyawan): 
+                                                                        $jumlah = $karyawan['jumlah_tiket'];
+                                                                        $persen = ($jumlah / $max_tiket) * 100;
+
+                                                                        if($persen > 100) $persen = 100;
+
+                                                                        if($persen >= 80){
+                                                                            $warna = 'bg-danger';
+                                                                        } elseif($persen >= 50){
+                                                                            $warna = 'bg-warning';
+                                                                        } else {
+                                                                            $warna = 'bg-success';
+                                                                        }
+                                                                    ?>
+                                                                    
+                                                                    <option value="<?= $karyawan['id']; ?>" 
+                                                                        <?= ($jumlah >= $max_tiket) ? 'disabled' : ''; ?>>
+                                                                        
+                                                                        <?= $karyawan['nama_karyawan']; ?> 
+                                                                        (<?= $jumlah; ?>/<?= $max_tiket; ?>)
+                                                                        
+                                                                    </option>
+
+                                                                    <?php endforeach; ?>
                                                                 </select>
+
+                                                                <div class="mt-1">
+                                                                    <?php foreach ($data_teknisi as $karyawan): 
+                                                                        $jumlah = $karyawan['jumlah_tiket'];
+                                                                        $persen = ($jumlah / $max_tiket) * 100;
+
+                                                                        if($persen > 100) $persen = 100;
+
+                                                                        if($persen >= 80){
+                                                                            $warna = 'bg-danger';
+                                                                        } elseif($persen >= 50){
+                                                                            $warna = 'bg-warning';
+                                                                        } else {
+                                                                            $warna = 'bg-success';
+                                                                        }
+                                                                    ?>
+                                                                        <small><?= $karyawan['nama_karyawan']; ?> (<?= $jumlah; ?>)</small>
+                                                                        <div class="progress" style="height: 8px;">
+                                                                            <div class="progress-bar <?= $warna; ?>" 
+                                                                                style="width: <?= $persen; ?>%;">
+                                                                            </div>
+                                                                        </div>
+                                                                    <?php endforeach; ?>
+                                                                </div>
+                                                                <br>
                                                                 <button type="submit" name="btn_kirim"
                                                                     class="btn btn-warning btn-sm">Kirim</button>
                                                         </form>

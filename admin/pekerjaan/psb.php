@@ -3,7 +3,29 @@ include "/xampp/htdocs/nsp/services/koneksi.php";
 
 $query_tampil = "SELECT * FROM psb";
 $result_tampil = $conn->query($query_tampil);
-$result_tampilkaryawan = $conn->query("SELECT * FROM karyawan WHERE posisi_karyawan = 'teknisi'");
+$query_teknisi = "
+    SELECT 
+        k.id,
+        k.nama_karyawan,
+        COUNT(w.id) AS jumlah_tiket
+    FROM karyawan k
+    LEFT JOIN wo w ON k.id = w.id_karyawan
+    WHERE k.posisi_karyawan = 'teknisi'
+    GROUP BY k.id
+    ORDER BY jumlah_tiket ASC
+";
+
+$result_teknisi = $conn->query($query_teknisi);
+
+if(!$result_teknisi){
+    die("Query Error: " . $conn->error);
+}
+
+$data_teknisi = [];
+while($row = mysqli_fetch_assoc($result_teknisi)){
+    $data_teknisi[] = $row;
+}
+
 
 if (isset($_POST['btn_kirim'])) {
     $id_psb = $_POST['id_psb'];
@@ -132,12 +154,61 @@ if (isset($_POST['btn_kirim'])) {
                                                         <form action="psb.php" method="POST">
                                                             <input type="hidden" name="id_psb"
                                                                 value="<?= $psb['id'] ?>">
-                                                            <select name="id_karyawan">
-                                                                <?php foreach ($result_tampilkaryawan as $karyawan) { ?>
-                                                                <option value="<?= $karyawan['id'] ?>">
-                                                                    <?= $karyawan['nama_karyawan'] ?></option>
-                                                                <?php } ?>
+                                                            <select name="id_karyawan" class="form-control form-control-sm">
+                                                                <?php 
+                                                                $max_tiket = 5; // 
+
+                                                                foreach ($data_teknisi as $karyawan): 
+                                                                    $jumlah = $karyawan['jumlah_tiket'];
+                                                                    $persen = ($jumlah / $max_tiket) * 100;
+
+                                                                    if($persen > 100) $persen = 100;
+
+                                                                    // warna
+                                                                    if($persen >= 80){
+                                                                        $warna = 'bg-danger';
+                                                                    } elseif($persen >= 50){
+                                                                        $warna = 'bg-warning';
+                                                                    } else {
+                                                                        $warna = 'bg-success';
+                                                                    }
+                                                                ?>
+                                                                
+                                                                <option value="<?= $karyawan['id']; ?>" 
+                                                                    <?= ($jumlah >= $max_tiket) ? 'disabled' : ''; ?>>
+                                                                    
+                                                                    <?= $karyawan['nama_karyawan']; ?> 
+                                                                    (<?= $jumlah; ?>/<?= $max_tiket; ?>)
+                                                                    
+                                                                </option>
+
+                                                                <?php endforeach; ?>
                                                             </select>
+                                                            
+                                                            <div class="mt-1">
+                                                                <?php foreach ($data_teknisi as $karyawan): 
+                                                                    $jumlah = $karyawan['jumlah_tiket'];
+                                                                    $persen = ($jumlah / $max_tiket) * 100;
+
+                                                                    if($persen > 100) $persen = 100;
+
+                                                                    if($persen >= 80){
+                                                                        $warna = 'bg-danger';
+                                                                    } elseif($persen >= 50){
+                                                                        $warna = 'bg-warning';
+                                                                    } else {
+                                                                        $warna = 'bg-success';
+                                                                    }
+                                                                ?>
+                                                                    <small><?= $karyawan['nama_karyawan']; ?></small>
+                                                                    <div class="progress" style="height: 8px;">
+                                                                        <div class="progress-bar <?= $warna; ?>" 
+                                                                            style="width: <?= $persen; ?>%;">
+                                                                        </div>
+                                                                    </div>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                            <br>
                                                             <button type="submit" name="btn_kirim"
                                                                 class="btn btn-warning btn-sm">Kirim</button>
                                                         </form>
