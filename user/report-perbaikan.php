@@ -99,6 +99,14 @@ if (isset($_POST['btn_submit'])) {
             }
         }
         if ($hasil) {
+            if ($status == 'SELESAI') {
+                $conn->query("
+                    UPDATE wo 
+                    SET status = 'SELESAI' 
+                    WHERE id_perbaikan = '$id'
+                ");
+            }
+
             echo "<script type= 'text/javascript'>
                     alert('Data Berhasil Diupdate');
                     document.location.href = 'wo_perbaikan.php';

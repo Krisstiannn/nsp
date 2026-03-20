@@ -53,7 +53,15 @@ if (isset($_POST['btn_submit'])) {
         $result_tambahData = $conn->query($query_tambahData);
         
         if ($result_tambahData) {
-            // insertPelanggan($conn, $id_langganan);
+
+            if($status == 'SELESAI'){
+                $conn->query("
+                    UPDATE wo 
+                    SET status = 'SELESAI' 
+                    WHERE id = '$no_wo'
+                ");
+            }
+
             echo "<script type= 'text/javascript'>
                     alert('Data Berhasil disimpan!');
                     document.location.href = 'wo_pemasangan.php';
@@ -100,6 +108,15 @@ if (isset($_POST['btn_submit'])) {
             }
         }
         if ($hasil_edit) {
+
+            if($status == 'SELESAI'){
+                $conn->query("
+                    UPDATE wo 
+                    SET status = 'SELESAI' 
+                    WHERE id = '$no_wo'
+                ");
+            }
+
             insertPelanggan($conn, $id_langganan, $tanggal);
             echo "<script type= 'text/javascript'>
                     alert('Data Berhasil Diupdate');
@@ -239,7 +256,7 @@ function insertPelanggan($conn, $id_langganan, $tanggal) {
                                         <option <?= $status == 'SAMPAI DILOKASI' ? 'selected' : '' ?>>SAMPAI DILOKASI</option>
                                         <option <?= $status == 'ON GOING PROGRES' ? 'selected' : ''?>>ON GOING PROGRES</option>
                                         <option <?= $status == 'SELESAI' ? 'selected' : '' ?>>SELESAI</option>
-                                        <option <?= $status == 'KENDALAL' ? 'selected' : '' ?>>KENDALAL</option>
+                                        <option <?= $status == 'KENDALA' ? 'selected' : '' ?>>KENDALA</option>
                                     </select>
                                 </div>
                                 <?php else: ?>

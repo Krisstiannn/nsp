@@ -9,7 +9,9 @@ $query_teknisi = "
         k.nama_karyawan,
         COUNT(w.id) AS jumlah_tiket
     FROM karyawan k
-    LEFT JOIN wo w ON k.id = w.id_karyawan
+    LEFT JOIN wo w 
+        ON k.id = w.id_karyawan 
+        AND w.status IN ('PENDING','OGP')
     WHERE k.posisi_karyawan = 'teknisi'
     GROUP BY k.id
     ORDER BY jumlah_tiket ASC
@@ -34,9 +36,27 @@ if (isset($_POST['btn_kirim'])) {
 
     $cek_karyawan = $conn->query("SELECT * FROM karyawan WHERE id = '$id_karyawan'");
     $cek_pekerjaan = $conn->query("SELECT * FROM psb WHERE id = '$id_psb'");
-    $cek = $conn->query("SELECT * FROM wo WHERE id_psb = '$id_psb'")->fetch_assoc();
+    $cek = $conn->query("
+                    SELECT * FROM wo 
+                    WHERE id_psb = '$id_psb' 
+                    AND status != 'SELESAI'
+                ")->fetch_assoc();
 
-    if ($cek > 0) {
+    $max_tiket = 5;
+
+    $cek_beban = $conn->query("
+        SELECT COUNT(*) as total 
+        FROM wo 
+        WHERE id_karyawan = '$id_karyawan'
+        AND status IN ('PENDING','OGP')
+    ")->fetch_assoc();
+
+    if ($cek_beban['total'] >= $max_tiket) {
+        echo "<script>alert('Teknisi sudah overload!'); window.location.href='psb.php';</script>";
+        die();
+    }
+    
+    if (!empty($cek)) {
         echo "<script>alert('Pekerjaan Sudah Di Kirimkan Ke Karyawan!'); window.location.href='psb.php';</script>";
         die();
     } else if ($cek_karyawan->num_rows > 0 && $cek_pekerjaan->num_rows > 0) {
@@ -154,7 +174,8 @@ if (isset($_POST['btn_kirim'])) {
                                                         <form action="psb.php" method="POST">
                                                             <input type="hidden" name="id_psb"
                                                                 value="<?= $psb['id'] ?>">
-                                                            <select name="id_karyawan" class="form-control form-control-sm">
+                                                            <select name="id_karyawan" class="form-control form-control-sm" required>
+                                                            <option value="">-- Pilih Teknisi --</option>
                                                                 <?php 
                                                                 $max_tiket = 5; // 
 
