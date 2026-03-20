@@ -87,6 +87,11 @@ if (isset($_POST['btn_logout'])) {
                                 <i class="far nav-icon"></i>
                                 <p class="text-light">Data Absen</p>
                             </a>
+                        </li><li class="nav-item">
+                            <a href="/nsp/admin/karyawan/rating-karyawan.php" class="nav-link">
+                                <i class="far nav-icon"></i>
+                                <p class="text-light">Rating Teknisi</p>
+                            </a>
                         </li>
                     </ul>
                 </li>

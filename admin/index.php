@@ -15,6 +15,55 @@ $query_jumlahData = "SELECT
 $result_jumlahData = $conn->query($query_jumlahData);
 $jumlah_data = $result_jumlahData->fetch_assoc();
 
+$tahun = date('Y');
+
+$query_grafik = "
+SELECT 
+    m.bulan,
+    COALESCE(p.pelanggan_baru, 0) AS pelanggan_baru,
+    COALESCE(g.gangguan, 0) AS gangguan
+FROM (
+    SELECT 1 AS bulan UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 
+    UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 
+    UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 UNION SELECT 12
+) AS m
+LEFT JOIN (
+    SELECT 
+        MONTH(tanggal_daftar) AS bulan,
+        COUNT(*) AS pelanggan_baru
+    FROM psb
+    WHERE YEAR(tanggal_daftar) = '$tahun'
+    GROUP BY MONTH(tanggal_daftar)
+) p ON m.bulan = p.bulan
+LEFT JOIN (
+    SELECT 
+        MONTH(tanggal_melapor) AS bulan,
+        COUNT(*) AS gangguan
+    FROM perbaikan
+    WHERE YEAR(tanggal_melapor) = '$tahun'
+    GROUP BY MONTH(tanggal_melapor)
+) g ON m.bulan = g.bulan
+ORDER BY m.bulan
+";
+
+$result_grafik = mysqli_query($conn, $query_grafik);
+
+$bulan_label = [];
+$pelanggan_baru = [];
+$gangguan = [];
+
+$nama_bulan = [
+    1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',
+    5=>'Mei',6=>'Jun',7=>'Jul',8=>'Agu',
+    9=>'Sep',10=>'Okt',11=>'Nov',12=>'Des'
+];
+
+while($row = mysqli_fetch_assoc($result_grafik)){
+    $bulan_label[] = $nama_bulan[$row['bulan']];
+    $pelanggan_baru[] = $row['pelanggan_baru'];
+    $gangguan[] = $row['gangguan'];
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -139,8 +188,19 @@ $jumlah_data = $result_jumlahData->fetch_assoc();
                 </div>
             </section>
             <section class="content">
-                <img src="/nsp/storage/netsun.jpg" alt="No pict" width="1500px">
-            </section>
+            <div class="container-fluid">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-gradient-info">
+                        <h3 class="card-title text-bold">
+                            Grafik Pelanggan Baru vs Gangguan (<?= $tahun ?>)
+                        </h3>
+                    </div>
+                    <div class="card-body" style="height: 400px;">
+                        <canvas id="grafikISP"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
         </div>
         <?php include "/xampp/htdocs/nsp/layouts/footer.php" ?>    
     </div>
@@ -158,6 +218,45 @@ $jumlah_data = $result_jumlahData->fetch_assoc();
     <script src="/nsp/dist/js/pages/dashboard2.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script>
+        var ctx = document.getElementById('grafikISP');
+
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar', // tetap bar
+                data: {
+                    labels: <?= json_encode($bulan_label); ?>,
+                    datasets: [
+                        {
+                            label: 'Pelanggan Baru',
+                            data: <?= json_encode($pelanggan_baru); ?>,
+                            backgroundColor: 'rgba(0, 200, 0, 0.7)'
+                        },
+                        {
+                            label: 'Gangguan',
+                            data: <?= json_encode($gangguan); ?>,
+                            backgroundColor: 'rgba(255, 0, 0, 0.7)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{
+                            barPercentage: 0.5,
+                            categoryPercentage: 0.5
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>
