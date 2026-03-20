@@ -8,7 +8,9 @@ $query_teknisi = "
         k.nama_karyawan,
         COUNT(w.id) AS jumlah_tiket
     FROM karyawan k
-    LEFT JOIN wo w ON k.id = w.id_karyawan
+    LEFT JOIN wo w 
+        ON k.id = w.id_karyawan 
+        AND w.status IN ('PENDING','OGP')
     WHERE k.posisi_karyawan = 'teknisi'
     GROUP BY k.id
     ORDER BY jumlah_tiket ASC
@@ -32,7 +34,11 @@ if (isset($_POST['btn_kirim'])) {
 
     $cek_karyawan = $conn->query("SELECT * FROM karyawan WHERE id = '$id_karyawan'");
     $cek_pekerjaan = $conn->query("SELECT * FROM perbaikan WHERE id_perbaikan = '$id_perbaikan'");
-    $cek = $conn->query("SELECT * FROM wo WHERE id_perbaikan = '$id_perbaikan'");
+    $cek = $conn->query("
+            SELECT * FROM wo 
+            WHERE id_perbaikan = '$id_perbaikan'
+            AND status != 'SELESAI'
+        ");
 
     if ($cek->num_rows > 0) {
         echo "<script>alert('Pekerjaan Sudah Di Kirimkan Ke Karyawan!'); window.location.href='psb.php';</script>";
@@ -42,6 +48,7 @@ if (isset($_POST['btn_kirim'])) {
             SELECT COUNT(*) as total 
             FROM wo 
             WHERE id_karyawan = '$id_karyawan'
+            AND status IN ('PENDING','OGP')
         ")->fetch_assoc();
 
         if($cek_beban['total'] >= 5){
@@ -49,7 +56,7 @@ if (isset($_POST['btn_kirim'])) {
             die();
         }
 
-        $query_insert = "INSERT INTO wo (id_karyawan, id_perbaikan) VALUES ('$id_karyawan', '$id_perbaikan')";
+        $query_insert = "INSERT INTO wo (id_karyawan, id_perbaikan, status) VALUES ('$id_karyawan', '$id_perbaikan', 'PENDING')')";
         if ($conn->query($query_insert)) {
             echo "<script>alert('Pekerjaan berhasil dikirim ke karyawan!'); window.location.href='perbaikan.php';</script>";
         } else {
@@ -156,7 +163,8 @@ if (isset($_POST['btn_kirim'])) {
                                                         <form action="perbaikan.php" method="POST">
                                                                 <input type="hidden" name="id_perbaikan"
                                                                     value="<?= $perbaikan['id_perbaikan'] ?>">
-                                                                <select name="id_karyawan" class="form-control form-control-sm">
+                                                                <select name="id_karyawan" class="form-control form-control-sm" required>
+                                                                <option value="">-- Pilih Teknisi --</option>
                                                                     <?php 
                                                                     $max_tiket = 5;
 
