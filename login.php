@@ -22,7 +22,7 @@ if (isset($_POST['btn_login'])) {
     $stmt = $conn->prepare($query_users);
     $stmt->bind_param("s", $username);
     $stmt->execute();
-    $result_users = $stmt->get_result();
+    $result_users = $stmt->get_result();    
 
     if ($result_users->num_rows > 0) {
 

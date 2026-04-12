@@ -10,6 +10,14 @@ $resultPelanggan = $conn->query($queryPelanggan);
 $id_pelanggan = $resultPelanggan->fetch_assoc();
 $id_pelanggan = $id_pelanggan['id_berlangganan'];
 
+$showKepuasan = false;
+$id_tiket_kepuasan = '';
+
+if(isset($_GET['step']) && $_GET['step'] == 'kepuasan'){
+    $showKepuasan = true;
+    $id_tiket_kepuasan = $_GET['id'];
+}
+
 if(isset($_POST['submit_rating'])){
 
     $id_teknisi = $_POST['id_teknisi'];
@@ -37,16 +45,40 @@ if(isset($_POST['submit_rating'])){
     ('$id_tiket','$id_teknisi','$id_pelanggan','$rating','$komentar')";
 
     if($conn->query($insert)){
-
-        header("Location: ".$_SERVER['PHP_SELF']."?rating=success");
+        header("Location: ".$_SERVER['PHP_SELF']."?step=kepuasan&id=".$id_tiket);
         exit;
-
-        }else{
+    }else {
 
         echo "<script>alert('Gagal menyimpan rating');</script>";
 
     }
 
+}
+
+if(isset($_POST['submit_kepuasan'])){
+
+    $id_tiket = $_POST['id_tiket'];
+    $rating = $_POST['rating_kepuasan'];
+    $komentar = $_POST['komentar_kepuasan'];
+
+    $cek = $conn->query("
+        SELECT id_wo FROM kepuasan_pelanggan WHERE id_wo='$id_tiket'
+    ");
+
+    if($cek->num_rows == 0){
+
+        $insert = "
+        INSERT INTO kepuasan_pelanggan
+        (id_wo,id_pelanggan,rating,komentar)
+        VALUES
+        ('$id_tiket','$id_pelanggan','$rating','$komentar')
+        ";
+
+        $conn->query($insert);
+    }
+
+    header("Location: ".$_SERVER['PHP_SELF']."?done=1");
+    exit;
 }
 
 if(isset($_GET['rating']) && $_GET['rating']=="success"){
@@ -217,6 +249,47 @@ echo "<script>alert('Terima kasih atas penilaian Anda');</script>";
                                     </tbody>
                                 </table>
                             </div>
+
+                            <div class="modal fade" id="kepuasanModal">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+
+                                        <form method="POST">
+
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Kepuasan Layanan</h5>
+                                            </div>
+
+                                            <div class="modal-body">
+
+                                                <input type="hidden" name="id_tiket"
+                                                    value="<?php echo $id_tiket_kepuasan ?>">
+
+                                                <label>Seberapa puas Anda?</label>
+                                                <select name="rating_kepuasan" class="form-control" required>
+                                                    <option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option>
+                                                    <option value="4">⭐⭐⭐⭐ Puas</option>
+                                                    <option value="3">⭐⭐⭐ Cukup</option>
+                                                    <option value="2">⭐⭐ Kurang</option>
+                                                    <option value="1">⭐ Buruk</option>
+                                                </select>
+
+                                                <label class="mt-2">Komentar</label>
+                                                <textarea name="komentar_kepuasan" class="form-control"></textarea>
+
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="submit" name="submit_kepuasan" class="btn btn-primary">
+                                                    Kirim
+                                                </button>
+                                            </div>
+
+                                        </form>
+
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </section>
                 </div>
@@ -256,6 +329,17 @@ echo "<script>alert('Terima kasih atas penilaian Anda');</script>";
     <script src="/nsp/dist/js/pages/dashboard2.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            <
+            ? php
+            if ($showKepuasan): ? >
+                $('#kepuasanModal').modal('show'); <
+            ? php endif; ? >
+
+        });
+    </script>
 </body>
 
 </html>

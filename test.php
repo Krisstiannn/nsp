@@ -1,187 +1,227 @@
 <?php
-include "/xampp/htdocs/nsp/services/koneksi.php";
 
-$tahun = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
+/* ===============================
+DUMMY DATA
+================================ */
 
-$query = "
-    SELECT 
-        k.id,
-        k.nama_karyawan,
-        AVG(r.rating) AS rata_rating,
-        COUNT(r.id_rating) AS jumlah_penilaian
-    FROM karyawan k
-    LEFT JOIN wo w ON k.id = w.id_karyawan
-    LEFT JOIN rating_teknisi r ON r.id_wo = w.id
-    WHERE k.posisi_karyawan = 'teknisi'
-    AND (YEAR(r.tanggal_rating) = '$tahun' OR r.tanggal_rating IS NULL)
-    GROUP BY k.id
-    ORDER BY rata_rating DESC, jumlah_penilaian DESC
-";
+$rata_rating = 4.2;
+$total_feedback = 128;
 
-$result = mysqli_query($conn, $query);
+$bulan = [
+"Jan","Feb","Mar","Apr","Mei","Jun",
+"Jul","Agu","Sep","Okt","Nov","Des"
+];
 
-$data_nama = [];
-$data_rating = [];
-$data_jumlah = [];
+$tren_rating = [4.1,4.0,4.3,4.2,4.5,4.4,4.3,4.6,4.4,4.2,4.3,4.5];
 
-$no = 1;
+$distribusi = [
+1 => 5,
+2 => 8,
+3 => 20,
+4 => 55,
+5 => 40
+];
+
+$teknisi = [
+["nama"=>"Andi","rating"=>4.5,"jumlah"=>40],
+["nama"=>"Budi","rating"=>4.2,"jumlah"=>35],
+["nama"=>"Rudi","rating"=>3.9,"jumlah"=>28],
+["nama"=>"Joko","rating"=>4.6,"jumlah"=>50]
+];
+
+$feedback = [
+["rating"=>5,"komentar"=>"Teknisi sangat cepat","tanggal"=>"2026-03-01"],
+["rating"=>4,"komentar"=>"Pelayanan bagus","tanggal"=>"2026-03-02"],
+["rating"=>3,"komentar"=>"Lumayan tapi agak lambat","tanggal"=>"2026-03-03"],
+["rating"=>5,"komentar"=>"Internet stabil","tanggal"=>"2026-03-04"],
+["rating"=>2,"komentar"=>"Perbaikan lama","tanggal"=>"2026-03-05"]
+];
+
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="utf-8">
-    <title>Rating Teknisi</title>
 
-    <link rel="stylesheet" href="/nsp/plugins/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="/nsp/dist/css/adminlte.min.css">
+<title>Dashboard Analisis Kepuasan</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f9;
+margin:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+margin-bottom:20px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+.summary{
+display:flex;
+gap:20px;
+}
+
+.box{
+flex:1;
+background:#ffffff;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+table th,td{
+padding:10px;
+border:1px solid #ddd;
+text-align:left;
+}
+
+</style>
+
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
-<div class="wrapper">
+<body>
 
-<?php include "/xampp/htdocs/nsp/layouts/header.php" ?>
-<?php include "/xampp/htdocs/nsp/layouts/sidebar.php" ?>
+<h2>📊 Dashboard Analisis Kepuasan Pelanggan</h2>
 
-<div class="content-wrapper">
+<!-- SUMMARY -->
+<div class="summary">
 
-<section class="content-header">
-    <div class="container-fluid">
-        <h1>Penilaian Teknisi</h1>
-    </div>
-</section>
+<div class="box">
+<h3>⭐ Rata-rata Rating</h3>
+<h1><?php echo $rata_rating ?></h1>
+</div>
 
-<section class="content">
-<div class="container-fluid">
+<div class="box">
+<h3>💬 Total Feedback</h3>
+<h1><?php echo $total_feedback ?></h1>
+</div>
 
-<!-- FILTER -->
+</div>
+
+<!-- GRAFIK -->
+<div class="grid">
+
 <div class="card">
-    <div class="card-header bg-gradient-info">
-        <h3 class="card-title">Filter Tahun</h3>
-    </div>
-    <div class="card-body">
-        <form method="GET">
-            <select name="tahun" class="form-control w-25" onchange="this.form.submit()">
-                <?php
-                for($i = date('Y'); $i >= 2020; $i--){
-                    $selected = ($tahun == $i) ? 'selected' : '';
-                    echo "<option value='$i' $selected>$i</option>";
-                }
-                ?>
-            </select>
-        </form>
-    </div>
+<h3>📈 Tren Kepuasan Bulanan</h3>
+<canvas id="trendChart"></canvas>
 </div>
 
-<!-- CHART -->
 <div class="card">
-    <div class="card-header bg-gradient-primary">
-        <h3 class="card-title">Grafik Rating Teknisi</h3>
-    </div>
-    <div class="card-body">
-        <canvas id="chartTeknisi" height="100"></canvas>
-    </div>
+<h3>📊 Distribusi Rating</h3>
+<canvas id="distChart"></canvas>
 </div>
 
-<!-- TABEL -->
+</div>
+
+<!-- TEKNISI -->
 <div class="card">
-    <div class="card-header bg-gradient-success">
-        <h3 class="card-title">Tabel Penilaian Teknisi</h3>
-    </div>
-    <div class="card-body table-responsive p-0">
-        <table class="table table-bordered text-center">
-            <thead class="bg-gradient-cyan">
-                <tr>
-                    <th>No</th>
-                    <th>Nama Teknisi</th>
-                    <th>Rata-rata Rating</th>
-                    <th>Jumlah Penilaian</th>
-                </tr>
-            </thead>
-            <tbody>
 
-            <?php while($row = mysqli_fetch_assoc($result)): 
-                $data_nama[] = $row['nama_karyawan'];
-                $data_rating[] = round($row['rata_rating'],1);
-                $data_jumlah[] = $row['jumlah_penilaian'];
-            ?>
-                <tr>
-                    <td><?= $no++ ?></td>
-                    <td><?= $row['nama_karyawan'] ?></td>
-                    <td>
-                        <span class="badge bg-success">
-                            <?= round($row['rata_rating'],1) ?: 0 ?>
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge bg-info">
-                            <?= $row['jumlah_penilaian'] ?>
-                        </span>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
+<h3>👨‍🔧 Performa Teknisi</h3>
 
-            </tbody>
-        </table>
-    </div>
-</div>
+<table>
 
-</div>
-</section>
+<tr>
+<th>Nama Teknisi</th>
+<th>Rata-rata Rating</th>
+<th>Jumlah Penilaian</th>
+</tr>
+
+<?php foreach($teknisi as $t){ ?>
+
+<tr>
+<td><?php echo $t['nama'] ?></td>
+<td><?php echo $t['rating'] ?></td>
+<td><?php echo $t['jumlah'] ?></td>
+</tr>
+
+<?php } ?>
+
+</table>
 
 </div>
 
-<?php include "/xampp/htdocs/nsp/layouts/footer.php" ?>
+<!-- FEEDBACK -->
+<div class="card">
+
+<h3>💬 Feedback Pelanggan</h3>
+
+<table>
+
+<tr>
+<th>Rating</th>
+<th>Komentar</th>
+<th>Tanggal</th>
+</tr>
+
+<?php foreach($feedback as $f){ ?>
+
+<tr>
+<td><?php echo $f['rating'] ?></td>
+<td><?php echo $f['komentar'] ?></td>
+<td><?php echo $f['tanggal'] ?></td>
+</tr>
+
+<?php } ?>
+
+</table>
 
 </div>
-
-<!-- JS -->
-<script src="/nsp/plugins/jquery/jquery.min.js"></script>
-<script src="/nsp/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="/nsp/dist/js/adminlte.min.js"></script>
-<script src="/nsp/plugins/chart.js/Chart.min.js"></script>
 
 <script>
-var ctx = document.getElementById('chartTeknisi').getContext('2d');
 
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: <?= json_encode($data_nama); ?>,
-        datasets: [
-            {
-                label: 'Rata-rata Rating',
-                data: <?= json_encode($data_rating); ?>,
-                backgroundColor: 'rgba(0,123,255,0.7)',
-                yAxisID: 'y'
-            },
-            {
-                label: 'Jumlah Penilaian',
-                data: <?= json_encode($data_jumlah); ?>,
-                backgroundColor: 'rgba(40,167,69,0.7)',
-                yAxisID: 'y1'
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                beginAtZero: true,
-                max: 5,
-                position: 'left'
-            },
-            y1: {
-                beginAtZero: true,
-                position: 'right',
-                grid: {
-                    drawOnChartArea: false
-                }
-            }
-        }
-    }
+/* TREN BULANAN */
+
+new Chart(document.getElementById('trendChart'),{
+type:'bar',
+data:{
+labels:<?php echo json_encode($bulan) ?>,
+datasets:[{
+label:'Rating',
+data:<?php echo json_encode($tren_rating) ?>,
+backgroundColor:'blue'
+}]
+}
 });
+
+
+/* DISTRIBUSI */
+
+new Chart(document.getElementById('distChart'),{
+type:'bar',
+data:{
+labels:['1','2','3','4','5'],
+datasets:[{
+label:'Jumlah',
+data:[
+<?php echo $distribusi[1] ?>,
+<?php echo $distribusi[2] ?>,
+<?php echo $distribusi[3] ?>,
+<?php echo $distribusi[4] ?>,
+<?php echo $distribusi[5] ?>
+],
+backgroundColor:'green'
+}]
+}
+});
+
 </script>
 
 </body>
