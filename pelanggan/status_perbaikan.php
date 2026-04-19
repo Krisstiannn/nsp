@@ -7,8 +7,9 @@ $nama_pelanggan = $_SESSION['nama_pelanggan'];
 $queryPelanggan = "SELECT * FROM perbaikan WHERE id_user = '$id_user' ORDER BY id_perbaikan DESC";
 $resultPelanggan = $conn->query($queryPelanggan);
 
-$id_pelanggan = $resultPelanggan->fetch_assoc();
-$id_pelanggan = $id_pelanggan['id_berlangganan'];
+$get_idLangganan = $conn->query("SELECT id_langganan FROM pelanggan WHERE id_user = '$id_user'");
+$result_idLangganan = $get_idLangganan->fetch_assoc();
+$id_pelanggan = $result_idLangganan['id_langganan'];
 
 $showKepuasan = false;
 $id_tiket_kepuasan = '';
@@ -331,13 +332,9 @@ echo "<script>alert('Terima kasih atas penilaian Anda');</script>";
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script>
         $(document).ready(function () {
-
-            <
-            ? php
-            if ($showKepuasan): ? >
-                $('#kepuasanModal').modal('show'); <
-            ? php endif; ? >
-
+            <?php if ($showKepuasan): ?>
+                $('#kepuasanModal').modal('show');
+            <?php endif; ?>
         });
     </script>
 </body>

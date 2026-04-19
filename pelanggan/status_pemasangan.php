@@ -68,10 +68,8 @@ if (isset($_POST['simpan_rating']) && isset($id_wo)) {
 
     if ($conn->query($insert)) {
 
-        echo "<script>
-        alert('Terima kasih atas penilaian Anda');
-        document.location.href = status_pemasangan.php;
-        </script>";
+        header("Location: ".$_SERVER['PHP_SELF']."?step=kepuasan&id=".$id_wo);
+        exit;
 
     } else {
 
@@ -83,6 +81,39 @@ if (isset($_POST['simpan_rating']) && isset($id_wo)) {
 
 }
 
+$showKepuasan = false;
+$id_tiket_kepuasan = '';
+
+if(isset($_GET['step']) && $_GET['step'] == 'kepuasan'){
+    $showKepuasan = true;
+    $id_tiket_kepuasan = $_GET['id'];
+}
+
+if(isset($_POST['submit_kepuasan'])){
+
+    $id_tiket = $_POST['id_tiket'];
+    $rating = $_POST['rating_kepuasan'];
+    $komentar = $_POST['komentar_kepuasan'];
+
+    $cek = $conn->query("
+        SELECT id_wo FROM kepuasan_pelanggan WHERE id_wo='$id_tiket'
+    ");
+
+    if($cek && $cek->num_rows == 0){
+
+        $insert = "
+        INSERT INTO kepuasan_pelanggan
+        (id_wo,id_pelanggan,rating,komentar)
+        VALUES
+        ('$id_tiket','$id_langganan','$rating','$komentar')
+        ";
+
+        $conn->query($insert);
+    }
+
+    header("Location: ".$_SERVER['PHP_SELF']."?done=1");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -232,6 +263,47 @@ if (isset($_POST['simpan_rating']) && isset($id_wo)) {
                             </div>
                         </div>
 
+                        <div class="modal fade" id="kepuasanModal">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+
+                                    <form method="POST">
+
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Kepuasan Layanan</h5>
+                                        </div>
+
+                                        <div class="modal-body">
+
+                                            <input type="hidden" name="id_tiket"
+                                                value="<?php echo $id_tiket_kepuasan ?>">
+
+                                            <label>Seberapa puas Anda?</label>
+                                            <select name="rating_kepuasan" class="form-control" required>
+                                                <option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option>
+                                                <option value="4">⭐⭐⭐⭐ Puas</option>
+                                                <option value="3">⭐⭐⭐ Cukup</option>
+                                                <option value="2">⭐⭐ Kurang</option>
+                                                <option value="1">⭐ Buruk</option>
+                                            </select>
+
+                                            <label class="mt-2">Komentar</label>
+                                            <textarea name="komentar_kepuasan" class="form-control"></textarea>
+
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="submit" name="submit_kepuasan" class="btn btn-primary">
+                                                Kirim
+                                            </button>
+                                        </div>
+
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -270,6 +342,13 @@ if (isset($_POST['simpan_rating']) && isset($id_wo)) {
     <script src="/nsp/dist/js/pages/dashboard2.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script>
+        $(document).ready(function () {
+            <?php if ($showKepuasan): ?>
+                $('#kepuasanModal').modal('show');
+            <?php endif; ?>
+        });
+    </script>
 </body>
 
 </html>

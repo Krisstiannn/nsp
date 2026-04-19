@@ -56,7 +56,7 @@ if (isset($_POST['btn_kirim'])) {
             die();
         }
 
-        $query_insert = "INSERT INTO wo (id_karyawan, id_perbaikan, status) VALUES ('$id_karyawan', '$id_perbaikan', 'PENDING')')";
+        $query_insert = "INSERT INTO wo (id_karyawan, id_perbaikan, status) VALUES ('$id_karyawan', '$id_perbaikan', 'PENDING')";
         if ($conn->query($query_insert)) {
             echo "<script>alert('Pekerjaan berhasil dikirim ke karyawan!'); window.location.href='perbaikan.php';</script>";
         } else {
