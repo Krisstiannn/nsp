@@ -48,9 +48,15 @@ $no = 1;
     <meta charset="utf-8">
     <title>Dashboard Kepuasan Pelanggan</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/nsp/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="/nsp/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
     <link rel="stylesheet" href="/nsp/dist/css/adminlte.min.css">
+    <link rel="icon" href="/nsp/storage/nsp.jpg">
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -158,11 +164,19 @@ $no = 1;
 
 </div>
 
-<script src="/nsp/plugins/jquery/jquery.min.js"></script>
-<script src="/nsp/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="/nsp/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
-<script src="/nsp/dist/js/adminlte.js"></script>
-<script src="/nsp/plugins/chart.js/Chart.min.js"></script>
+    <script src="/nsp/plugins/jquery/jquery.min.js"></script>
+    <script src="/nsp/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/nsp/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+    <script src="/nsp/dist/js/adminlte.js"></script>
+    <script src="/nsp/plugins/jquery-mousewheel/jquery.mousewheel.js"></script>
+    <script src="/nsp/plugins/raphael/raphael.min.js"></script>
+    <script src="/nsp/plugins/jquery-mapael/jquery.mapael.min.js"></script>
+    <script src="/nsp/plugins/jquery-mapael/maps/usa_states.min.js"></script>
+    <script src="/nsp/plugins/chart.js/Chart.min.js"></script>
+    <script src="/nsp/dist/js/demo.js"></script>
+    <script src="/nsp/dist/js/pages/dashboard2.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
 <script>
 var ctx = document.getElementById('chartKepuasan');

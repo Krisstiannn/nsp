@@ -105,6 +105,15 @@ if (isset($_POST['btn_logout'])) {
                     </a>
                 </li>
                 <li class="nav-item ">
+                    <a href="/nsp/admin/pelanggan/kepuasan-pelanggan.php" class="nav-link">
+                        <ion-icon name="bar-chart-outline" class="far nav-icon"></ion-icon>
+                        <p class="text-light">
+                            Kepuasan Pelanggan
+                            <i class="right fas"></i>
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item ">
                     <a href="#" class="nav-link">
                         <ion-icon name="code-working-outline" class="far nav-icon"></ion-icon>
                         <p class="text-light">

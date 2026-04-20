@@ -1,8 +1,48 @@
 <?php
 include "/xampp/htdocs/nsp/services/koneksi.php";
 
-$query_tampil = "SELECT * FROM psb";
+$query_tampil = "
+    SELECT *
+    FROM psb p
+    WHERE NOT EXISTS (
+        SELECT 1 FROM wo w 
+        WHERE w.id_psb = p.id 
+        AND w.status != 'SELESAI'
+    )
+";
 $result_tampil = $conn->query($query_tampil);
+
+$query_monitoring = "
+    SELECT 
+        p.id_langganan,
+        p.nama_pelanggan,
+        p.wa_pelanggan,
+        p.alamat_pelanggan,
+        p.paket_internet,
+        k.nama_karyawan,
+        w.status AS status_wo,
+        rp.status AS status_report,
+        rp.keterangan
+    FROM wo w
+    JOIN psb p ON p.id = w.id_psb
+    LEFT JOIN karyawan k ON k.id = w.id_karyawan
+
+    LEFT JOIN (
+    SELECT rp1.*
+    FROM report_pemasangan rp1
+    INNER JOIN (
+        SELECT id_langganan, MAX(id) as max_id
+        FROM report_pemasangan
+        GROUP BY id_langganan
+        ) rp2 ON rp1.id = rp2.max_id
+    ) rp ON rp.id_langganan = p.id_langganan
+
+    WHERE w.id_psb IS NOT NULL
+    ORDER BY w.id DESC
+";
+
+$result_monitoring = $conn->query($query_monitoring);
+
 $query_teknisi = "
     SELECT 
         k.id,
@@ -174,8 +214,9 @@ if (isset($_POST['btn_kirim'])) {
                                                         <form action="psb.php" method="POST">
                                                             <input type="hidden" name="id_psb"
                                                                 value="<?= $psb['id'] ?>">
-                                                            <select name="id_karyawan" class="form-control form-control-sm" required>
-                                                            <option value="">-- Pilih Teknisi --</option>
+                                                            <select name="id_karyawan"
+                                                                class="form-control form-control-sm" required>
+                                                                <option value="">-- Pilih Teknisi --</option>
                                                                 <?php 
                                                                 $max_tiket = 5; // 
 
@@ -194,18 +235,18 @@ if (isset($_POST['btn_kirim'])) {
                                                                         $warna = 'bg-success';
                                                                     }
                                                                 ?>
-                                                                
-                                                                <option value="<?= $karyawan['id']; ?>" 
+
+                                                                <option value="<?= $karyawan['id']; ?>"
                                                                     <?= ($jumlah >= $max_tiket) ? 'disabled' : ''; ?>>
-                                                                    
-                                                                    <?= $karyawan['nama_karyawan']; ?> 
+
+                                                                    <?= $karyawan['nama_karyawan']; ?>
                                                                     (<?= $jumlah; ?>/<?= $max_tiket; ?>)
-                                                                    
+
                                                                 </option>
 
                                                                 <?php endforeach; ?>
                                                             </select>
-                                                            
+
                                                             <div class="mt-1">
                                                                 <?php foreach ($data_teknisi as $karyawan): 
                                                                     $jumlah = $karyawan['jumlah_tiket'];
@@ -221,12 +262,12 @@ if (isset($_POST['btn_kirim'])) {
                                                                         $warna = 'bg-success';
                                                                     }
                                                                 ?>
-                                                                    <small><?= $karyawan['nama_karyawan']; ?></small>
-                                                                    <div class="progress" style="height: 8px;">
-                                                                        <div class="progress-bar <?= $warna; ?>" 
-                                                                            style="width: <?= $persen; ?>%;">
-                                                                        </div>
+                                                                <small><?= $karyawan['nama_karyawan']; ?></small>
+                                                                <div class="progress" style="height: 8px;">
+                                                                    <div class="progress-bar <?= $warna; ?>"
+                                                                        style="width: <?= $persen; ?>%;">
                                                                     </div>
+                                                                </div>
                                                                 <?php endforeach; ?>
                                                             </div>
                                                             <br>
@@ -255,6 +296,58 @@ if (isset($_POST['btn_kirim'])) {
                                     </div>
                                 </div>
 
+                                <div class="card mt-4">
+                                    <div class="card-header bg-success text-white">
+                                        <h3 class="card-title">Tiket Sedang Diproses</h3>
+                                    </div>
+
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered text-center">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID Langganan</th>
+                                                        <th>Nama</th>
+                                                        <th>WA</th>
+                                                        <th>Alamat</th>
+                                                        <th>Paket</th>
+                                                        <th>Teknisi</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                    <?php while($row = mysqli_fetch_assoc($result_monitoring)): ?>
+                                                    <tr>
+                                                        <td><?= $row['id_langganan'] ?></td>
+                                                        <td><?= $row['nama_pelanggan'] ?></td>
+                                                        <td><?= $row['wa_pelanggan'] ?></td>
+                                                        <td><?= $row['alamat_pelanggan'] ?></td>
+                                                        <td><?= $row['paket_internet'] ?></td>
+                                                        <td><?= $row['nama_karyawan'] ?></td>
+
+                                                        <td>
+                                                            <?php 
+                                                               $status = $row['status_report'] ?? $row['status_wo'];
+                                                                if($status == 'SELESAI'){
+                                                                    $badge = 'bg-success';
+                                                                } elseif($status == 'OGP'){
+                                                                    $badge = 'bg-primary';
+                                                                } else {
+                                                                    $badge = 'bg-warning';
+                                                                }
+
+                                                                echo "<span class='badge $badge'>$status</span>";
+                                                                ?>
+                                                        </td>
+                                                    </tr>
+                                                    <?php endwhile; ?>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

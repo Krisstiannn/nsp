@@ -208,7 +208,7 @@ if (isset($_POST['btn_submit'])) {
                                         <option <?= $status == 'SAMPAI DILOKASI' ? 'selected' : '' ?>>SAMPAI DILOKASI</option>
                                         <option <?= $status == 'ON GOING PROGRES' ? 'selected' : ''?>>ON GOING PROGRES</option>
                                         <option <?= $status == 'SELESAI' ? 'selected' : '' ?>>SELESAI</option>
-                                        <option <?= $status == 'KENDALAL' ? 'selected' : '' ?>>KENDALAL</option>
+                                        <option <?= $status == 'KENDALA' ? 'selected' : '' ?>>KENDALA</option>
                                     </select>
                                 </div>
                                 <?php else: ?>

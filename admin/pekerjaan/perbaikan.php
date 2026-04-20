@@ -1,7 +1,35 @@
 <?php
 include "/xampp/htdocs/nsp/services/koneksi.php";
-$tampil_data = "SELECT * FROM perbaikan";
-$result_tampilData = $conn->query($tampil_data);
+$query_belum = "
+SELECT p.*
+FROM perbaikan p
+LEFT JOIN wo w ON p.id_perbaikan = w.id_perbaikan
+WHERE w.id IS NULL
+ORDER BY p.id_perbaikan DESC
+";
+$result_belum = $conn->query($query_belum);
+
+$query_sudah = "
+SELECT 
+    p.*,
+    k.nama_karyawan,
+    r.status
+FROM perbaikan p
+JOIN wo w ON p.id_perbaikan = w.id_perbaikan
+LEFT JOIN karyawan k ON w.id_karyawan = k.id
+
+LEFT JOIN report_perbaikan r 
+    ON r.no_wo = p.id_perbaikan
+    AND r.id = (
+        SELECT MAX(r2.id) 
+        FROM report_perbaikan r2 
+        WHERE r2.no_wo = p.id_perbaikan
+    )
+
+ORDER BY p.id_perbaikan DESC
+";
+$result_sudah = $conn->query($query_sudah);
+
 $query_teknisi = "
     SELECT 
         k.id,
@@ -152,7 +180,7 @@ if (isset($_POST['btn_kirim'])) {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php foreach ($result_tampilData as $perbaikan) {?>
+                                                <?php foreach ($result_belum as $perbaikan) {?>
                                                 <tr>
                                                     <td><?= $perbaikan['id_berlangganan']?></td>
                                                     <td><?= $perbaikan['nama_pelanggan']?></td>
@@ -161,11 +189,12 @@ if (isset($_POST['btn_kirim'])) {
                                                     <td><?= $perbaikan['keluhan']?></td>
                                                     <td>
                                                         <form action="perbaikan.php" method="POST">
-                                                                <input type="hidden" name="id_perbaikan"
-                                                                    value="<?= $perbaikan['id_perbaikan'] ?>">
-                                                                <select name="id_karyawan" class="form-control form-control-sm" required>
+                                                            <input type="hidden" name="id_perbaikan"
+                                                                value="<?= $perbaikan['id_perbaikan'] ?>">
+                                                            <select name="id_karyawan"
+                                                                class="form-control form-control-sm" required>
                                                                 <option value="">-- Pilih Teknisi --</option>
-                                                                    <?php 
+                                                                <?php 
                                                                     $max_tiket = 5;
 
                                                                     foreach ($data_teknisi as $karyawan): 
@@ -182,20 +211,20 @@ if (isset($_POST['btn_kirim'])) {
                                                                             $warna = 'bg-success';
                                                                         }
                                                                     ?>
-                                                                    
-                                                                    <option value="<?= $karyawan['id']; ?>" 
-                                                                        <?= ($jumlah >= $max_tiket) ? 'disabled' : ''; ?>>
-                                                                        
-                                                                        <?= $karyawan['nama_karyawan']; ?> 
-                                                                        (<?= $jumlah; ?>/<?= $max_tiket; ?>)
-                                                                        
-                                                                    </option>
 
-                                                                    <?php endforeach; ?>
-                                                                </select>
+                                                                <option value="<?= $karyawan['id']; ?>"
+                                                                    <?= ($jumlah >= $max_tiket) ? 'disabled' : ''; ?>>
 
-                                                                <div class="mt-1">
-                                                                    <?php foreach ($data_teknisi as $karyawan): 
+                                                                    <?= $karyawan['nama_karyawan']; ?>
+                                                                    (<?= $jumlah; ?>/<?= $max_tiket; ?>)
+
+                                                                </option>
+
+                                                                <?php endforeach; ?>
+                                                            </select>
+
+                                                            <div class="mt-1">
+                                                                <?php foreach ($data_teknisi as $karyawan): 
                                                                         $jumlah = $karyawan['jumlah_tiket'];
                                                                         $persen = ($jumlah / $max_tiket) * 100;
 
@@ -209,17 +238,18 @@ if (isset($_POST['btn_kirim'])) {
                                                                             $warna = 'bg-success';
                                                                         }
                                                                     ?>
-                                                                        <small><?= $karyawan['nama_karyawan']; ?> (<?= $jumlah; ?>)</small>
-                                                                        <div class="progress" style="height: 8px;">
-                                                                            <div class="progress-bar <?= $warna; ?>" 
-                                                                                style="width: <?= $persen; ?>%;">
-                                                                            </div>
-                                                                        </div>
-                                                                    <?php endforeach; ?>
+                                                                <small><?= $karyawan['nama_karyawan']; ?>
+                                                                    (<?= $jumlah; ?>)</small>
+                                                                <div class="progress" style="height: 8px;">
+                                                                    <div class="progress-bar <?= $warna; ?>"
+                                                                        style="width: <?= $persen; ?>%;">
+                                                                    </div>
                                                                 </div>
-                                                                <br>
-                                                                <button type="submit" name="btn_kirim"
-                                                                    class="btn btn-warning btn-sm">Kirim</button>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                            <br>
+                                                            <button type="submit" name="btn_kirim"
+                                                                class="btn btn-warning btn-sm">Kirim</button>
                                                         </form>
                                                     </td>
                                                     <!-- <td>
@@ -238,6 +268,59 @@ if (isset($_POST['btn_kirim'])) {
                                                 <?php }?>
                                             </tbody>
                                         </table>
+                                    </div>
+                                </div>
+
+                                <div class="card mt-4">
+                                    <div class="card-header bg-success text-white">
+                                        <h3 class="card-title">Tiket Sedang Diproses</h3>
+                                    </div>
+
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered text-center">
+                                                <thead class="bg-light">
+                                                    <tr>
+                                                        <th>ID Berlangganan</th>
+                                                        <th>Nama Pelanggan</th>
+                                                        <th>NO WA</th>
+                                                        <th>Alamat</th>
+                                                        <th>Keluhan</th>
+                                                        <th>Teknisi</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                    <?php foreach ($result_sudah as $row) { ?>
+                                                    <tr>
+                                                        <td><?= $row['id_berlangganan'] ?></td>
+                                                        <td><?= $row['nama_pelanggan'] ?></td>
+                                                        <td><?= $row['no_telp'] ?></td>
+                                                        <td><?= $row['alamat'] ?></td>
+                                                        <td><?= $row['keluhan'] ?></td>
+                                                        <td><?= $row['nama_karyawan'] ?></td>
+                                                        <td>
+                                                            <?php
+                                                                $status = $row['status'] ?? 'MENUNGGU';
+
+                                                                if($status == 'SELESAI'){
+                                                                    echo "<span class='badge bg-success'>SELESAI</span>";
+                                                                } elseif($status == 'OGP'){
+                                                                    echo "<span class='badge bg-primary'>ON GOING</span>";
+                                                                } elseif($status == 'PENDING'){
+                                                                    echo "<span class='badge bg-warning'>PENDING</span>";
+                                                                } else {
+                                                                    echo "<span class='badge bg-secondary'>$status</span>";
+                                                                }
+                                                            ?>
+                                                        </td>
+                                                    </tr>
+                                                    <?php } ?>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
 
