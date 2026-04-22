@@ -205,6 +205,12 @@ if (isset($_POST['btn_logout'])) {
                                 <p class="text-light">Laporan Inventaris</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="/nsp/admin/laporan/laporan-lembur.php" class="nav-link">
+                                <i class="far nav-icon"></i>
+                                <p class="text-light">Laporan Lembur</p>
+                            </a>
+                        </li>
 
                     </ul>
                 </li>

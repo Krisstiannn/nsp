@@ -38,8 +38,8 @@ if (isset($_POST['btn_submit'])) {
     $jumlah1 = $_POST['jumlah1'] ?? NULL;
     $jumlah2 = $_POST['jumlah2'] ?? NULL;
     $jumlah3 = $_POST['jumlah3'] ?? NULL;
-    $foto_awal = $_FILES['foto_awal']['name'];
-    $foto_akhir = $_FILES['foto_akhir']['name'];
+    $foto_awal = !empty($_FILES['foto_awal']['name']) ? $_FILES['foto_awal']['name'] : $data['kondisi_awal'] ?? NULL;
+    $foto_akhir = !empty($_FILES['foto_akhir']['name']) ? $_FILES['foto_akhir']['name'] : $data['kondisi_akhir'] ?? NULL;
 
     $dir_foto = "/xampp/htdocs/nsp/storage/img/";
     $tmp_awal = $_FILES['foto_awal']['tmp_name'];
@@ -47,7 +47,7 @@ if (isset($_POST['btn_submit'])) {
     move_uploaded_file($tmp_awal, $dir_foto . $foto_awal);
     move_uploaded_file($tmp_akhir, $dir_foto . $foto_akhir);
 
-    if ($cek->num_rows == 0) {
+    if ($cek->num_rows > 0) {
         $query_tambahData = "INSERT INTO report_perbaikan (id, no_wo ,id_langganan, status, keterangan, material1, material2, material3, jumlah1, jumlah2, jumlah3, kondisi_awal, kondisi_akhir) 
             VALUES ('', '$no_wo','$id_langganan', '$status', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)";
         $result_tambahData = $conn->query($query_tambahData);
@@ -99,10 +99,16 @@ if (isset($_POST['btn_submit'])) {
             }
         }
         if ($hasil) {
-            if ($status == 'SELESAI') {
+            if ($status == 'SELESAI' || $status == 'KENDALA') {
                 $conn->query("
                     UPDATE wo 
                     SET status = 'SELESAI' 
+                    WHERE id_perbaikan = '$id'
+                ");
+            } else {
+                $conn->query("
+                    UPDATE wo 
+                    SET status = 'OGP' 
                     WHERE id_perbaikan = '$id'
                 ");
             }

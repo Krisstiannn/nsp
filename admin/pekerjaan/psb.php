@@ -44,17 +44,34 @@ $query_monitoring = "
 $result_monitoring = $conn->query($query_monitoring);
 
 $query_teknisi = "
-    SELECT 
-        k.id,
-        k.nama_karyawan,
-        COUNT(w.id) AS jumlah_tiket
-    FROM karyawan k
-    LEFT JOIN wo w 
-        ON k.id = w.id_karyawan 
-        AND w.status IN ('PENDING','OGP')
-    WHERE k.posisi_karyawan = 'teknisi'
-    GROUP BY k.id
-    ORDER BY jumlah_tiket ASC
+SELECT 
+    k.id,
+    k.nama_karyawan,
+    COUNT(w.id) AS jumlah_tiket
+FROM karyawan k
+LEFT JOIN wo w 
+    ON k.id = w.id_karyawan 
+
+LEFT JOIN (
+    SELECT rp1.*
+    FROM report_pemasangan rp1
+    INNER JOIN (
+        SELECT id_langganan, MAX(id) as max_id
+        FROM report_pemasangan
+        GROUP BY id_langganan
+    ) rp2 ON rp1.id = rp2.max_id
+) rp ON rp.id_langganan = (
+    SELECT p.id_langganan FROM psb p WHERE p.id = w.id_psb
+)
+
+WHERE k.posisi_karyawan = 'teknisi'
+AND (
+    rp.status IS NULL 
+    OR rp.status NOT IN ('SELESAI','KENDALA')
+)
+
+GROUP BY k.id
+ORDER BY jumlah_tiket ASC
 ";
 
 $result_teknisi = $conn->query($query_teknisi);
@@ -85,10 +102,26 @@ if (isset($_POST['btn_kirim'])) {
     $max_tiket = 5;
 
     $cek_beban = $conn->query("
-        SELECT COUNT(*) as total 
-        FROM wo 
-        WHERE id_karyawan = '$id_karyawan'
-        AND status IN ('PENDING','OGP')
+    SELECT COUNT(w.id) as total
+    FROM wo w
+
+    LEFT JOIN (
+        SELECT rp1.*
+        FROM report_pemasangan rp1
+        INNER JOIN (
+            SELECT id_langganan, MAX(id) as max_id
+            FROM report_pemasangan
+            GROUP BY id_langganan
+        ) rp2 ON rp1.id = rp2.max_id
+    ) rp ON rp.id_langganan = (
+        SELECT p.id_langganan FROM psb p WHERE p.id = w.id_psb
+    )
+
+    WHERE w.id_karyawan = '$id_karyawan'
+    AND (
+        rp.status IS NULL 
+        OR rp.status NOT IN ('SELESAI','KENDALA')
+    )
     ")->fetch_assoc();
 
     if ($cek_beban['total'] >= $max_tiket) {

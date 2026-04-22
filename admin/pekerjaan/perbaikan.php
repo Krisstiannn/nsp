@@ -3,8 +3,11 @@ include "/xampp/htdocs/nsp/services/koneksi.php";
 $query_belum = "
 SELECT p.*
 FROM perbaikan p
-LEFT JOIN wo w ON p.id_perbaikan = w.id_perbaikan
-WHERE w.id IS NULL
+WHERE NOT EXISTS (
+    SELECT 1 FROM wo w 
+    WHERE w.id_perbaikan = p.id_perbaikan
+    AND w.status IN ('PENDING','OGP')
+)
 ORDER BY p.id_perbaikan DESC
 ";
 $result_belum = $conn->query($query_belum);
@@ -63,10 +66,10 @@ if (isset($_POST['btn_kirim'])) {
     $cek_karyawan = $conn->query("SELECT * FROM karyawan WHERE id = '$id_karyawan'");
     $cek_pekerjaan = $conn->query("SELECT * FROM perbaikan WHERE id_perbaikan = '$id_perbaikan'");
     $cek = $conn->query("
-            SELECT * FROM wo 
-            WHERE id_perbaikan = '$id_perbaikan'
-            AND status != 'SELESAI'
-        ");
+                        SELECT * FROM wo 
+                        WHERE id_perbaikan = '$id_perbaikan'
+                        AND status IN ('PENDING','OGP')
+                    ");
 
     if ($cek->num_rows > 0) {
         echo "<script>alert('Pekerjaan Sudah Di Kirimkan Ke Karyawan!'); window.location.href='psb.php';</script>";
@@ -310,6 +313,8 @@ if (isset($_POST['btn_kirim'])) {
                                                                     echo "<span class='badge bg-primary'>ON GOING</span>";
                                                                 } elseif($status == 'PENDING'){
                                                                     echo "<span class='badge bg-warning'>PENDING</span>";
+                                                                } elseif($status == 'KENDALA'){
+                                                                    echo "<span class='badge bg-danger'>KENDALA</span>";
                                                                 } else {
                                                                     echo "<span class='badge bg-secondary'>$status</span>";
                                                                 }

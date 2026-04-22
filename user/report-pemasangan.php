@@ -17,6 +17,7 @@ $query_material = "SELECT * FROM material";
 $result_material = $conn->query($query_material);
 
 $cek = $conn->query("SELECT * FROM report_pemasangan WHERE no_wo = '$id'");
+$data = $cek->fetch_assoc();
 
 if (isset($_POST['btn_submit'])) {
     $no_wo = $_POST['no_wo'];
@@ -33,9 +34,9 @@ if (isset($_POST['btn_submit'])) {
     $jumlah1 = $_POST['jumlah1'] ?? NULL;
     $jumlah2 = $_POST['jumlah2'] ?? NULL;
     $jumlah3 = $_POST['jumlah3'] ?? NULL;
-    $foto_odp = $_FILES['foto_odp']['name'];
-    $foto_redaman = $_FILES['foto_redaman']['name'];
-    $foto_modem = $_FILES['foto_modem']['name'];
+    $foto_odp = !empty($_FILES['foto_odp']['name']) ? $_FILES['foto_odp']['name'] : ($data['foto_odp'] ?? null);
+    $foto_redaman = !empty($_FILES['foto_redaman']['name']) ? $_FILES['foto_redaman']['name'] : ($data['foto_redaman'] ?? null);
+    $foto_modem = !empty($_FILES['foto_modem']['name']) ? $_FILES['foto_modem']['name'] : ($data['foto_modem'] ?? null);
 
     $dir_foto = "/xampp/htdocs/nsp/storage/img/";
     $tmp_odp = $_FILES['foto_odp']['tmp_name'];
@@ -54,10 +55,16 @@ if (isset($_POST['btn_submit'])) {
         
         if ($result_tambahData) {
 
-            if($status == 'SELESAI'){
+            if ($status == 'SELESAI' || $status == 'KENDALA') {
                 $conn->query("
                     UPDATE wo 
                     SET status = 'SELESAI' 
+                    WHERE id = '$no_wo'
+                ");
+            } else {
+                $conn->query("
+                    UPDATE wo 
+                    SET status = 'OGP' 
                     WHERE id = '$no_wo'
                 ");
             }
@@ -72,8 +79,10 @@ if (isset($_POST['btn_submit'])) {
                     document.location.href = 'report-pemasangan.php';
                 </script>";
         }
-    $data = $result->fetch_assoc();
+
+
     } elseif ($cek->num_rows == 1) {
+        //$data = $cek->fetch_assoc();
         $edit = "UPDATE report_pemasangan SET 
                  status = '$status', 
                  keterangan = '$keterangan',
@@ -89,9 +98,12 @@ if (isset($_POST['btn_submit'])) {
                  WHERE no_wo = '$id'";
         $hasil_edit = $conn->query($edit);
         if (
-            $hasil_edit && empty($data['material1']) && empty($data['material2']) && empty($data['material3']) &&
-            ($jumlah1 > 0 || $jumlah2 > 0 || $jumlah3 > 0)
-        ) {
+                $hasil_edit && 
+                (!isset($data['material1']) || empty($data['material1'])) &&
+                (!isset($data['material2']) || empty($data['material2'])) &&
+                (!isset($data['material3']) || empty($data['material3'])) &&
+                ($jumlah1 > 0 || $jumlah2 > 0 || $jumlah3 > 0)
+            ) {
             $materials = [
                 ['nama' => $material1, 'jumlah' => (int)$jumlah1],
                 ['nama' => $material2, 'jumlah' => (int)$jumlah2],
@@ -109,10 +121,16 @@ if (isset($_POST['btn_submit'])) {
         }
         if ($hasil_edit) {
 
-            if($status == 'SELESAI'){
+            if ($status == 'SELESAI' || $status == 'KENDALA') {
                 $conn->query("
                     UPDATE wo 
                     SET status = 'SELESAI' 
+                    WHERE id = '$no_wo'
+                ");
+            } else {
+                $conn->query("
+                    UPDATE wo 
+                    SET status = 'OGP' 
                     WHERE id = '$no_wo'
                 ");
             }
@@ -245,8 +263,7 @@ function insertPelanggan($conn, $id_langganan, $tanggal) {
                                     <input type="text" class="form-control" value="<?= $result['wa_pelanggan'] ?>" disabled>
                                 </div>
                                 <?php if ($cek->num_rows > 0): ?>
-                                <?php 
-                                    $data = $cek->fetch_assoc(); 
+                                <?php  
                                     $status = $data['status'];
                                 ?>
                                 <div class="form-group">
