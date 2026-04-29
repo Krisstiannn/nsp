@@ -25,6 +25,7 @@ $upDown = $conn->query("SELECT* FROM updown_paket WHERE id_pelanggan = '$id_lang
     <link rel="stylesheet" href="/nsp/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="/nsp/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
     <link rel="stylesheet" href="/nsp/dist/css/adminlte.min.css">
+    <link rel="icon" href="/nsp/storage/nsp.jpg">
 </head>
 
 <body class="hold-transition layout-top-nav">

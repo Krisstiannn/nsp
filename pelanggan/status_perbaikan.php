@@ -98,6 +98,7 @@ echo "<script>alert('Terima kasih atas penilaian Anda');</script>";
     <link rel="stylesheet" href="/nsp/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="/nsp/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
     <link rel="stylesheet" href="/nsp/dist/css/adminlte.min.css">
+    <link rel="icon" href="/nsp/storage/nsp.jpg">
 </head>
 
 <body class="hold-transition layout-top-nav">
