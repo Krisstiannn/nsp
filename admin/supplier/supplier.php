@@ -87,23 +87,23 @@ $result_tampilData = $conn->query($query_tampilData);
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
-                                            <?php foreach ($result_tampilData as $material) { ?>
                                             <tbody>
+                                                <?php foreach ($result_tampilData as $supplier) { ?>
                                                 <tr>
-                                                    <td><?= $material['nama_supplier'] ?></td>
-                                                    <td><?= $material['alamat_supplier'] ?></td>
-                                                    <td><?= $material['kontak_supplier'] ?></td>
-                                                    <td><?= $material['nama_pic'] ?></td>
-                                                    <td><?= $material['kontak_pic'] ?></td>
+                                                    <td><?= $supplier['nama_supplier'] ?></td>
+                                                    <td><?= $supplier['alamat_supplier'] ?></td>
+                                                    <td><?= $supplier['kontak_supplier'] ?></td>
+                                                    <td><?= $supplier['nama_pic'] ?></td>
+                                                    <td><?= $supplier['kontak_pic'] ?></td>
                                                     <td>
                                                             <a class="btn btn-info btn-sm"
-                                                                href="edit-supplier.php?id=<?= $material['id_supplier'] ?>"">
+                                                                href="edit-supplier.php?id=<?= $supplier['id_supplier'] ?>">
                                                                 <i class="fas fa-pencil-alt">
                                                                 </i>
                                                                 Edit
                                                             </a>
                                                             <a class="btn btn-danger btn-sm"
-                                                                href="hapus-supplier.php?id=<?= $material['id_supplier'] ?>""
+                                                                href="hapus-supplier.php?id=<?= $supplier['id_supplier'] ?>"
                                                                 onClick="javascript: return confirm('Apakah yakin ingin menghapus data ini?');">
                                                                 <i class="fas fa-trash">
                                                                 </i>
@@ -111,8 +111,8 @@ $result_tampilData = $conn->query($query_tampilData);
                                                             </a>
                                                         </td>
                                                 </tr>
+                                                <?php } ?>
                                             </tbody>
-                                            <?php } ?>
                                         </table>
                                     </div>
                                 </div>
