@@ -94,8 +94,10 @@ if (isset($_POST['btn_submit'])) {
                                         </div>
                                         <div class="form-group">
                                             <label for="alamat">Alamat atau Titik Kordinat</label>
-                                            <textarea type="text" class="form-control" name="alamat"
-                                                placeholder="Alamat Lengkap Rumah" required></textarea>
+                                            <input type="hidden" class="form-control" name="alamat"
+                                                placeholder="Alamat Lengkap Rumah" value="<?= $hasil['alamat_pelanggan'] ?>"></input>
+                                            <input type="text" class="form-control" name="alamat"
+                                                placeholder="Alamat Lengkap Rumah" value="<?= $hasil['alamat_pelanggan'] ?>" disabled></input>
                                         </div>
                                         <div class="form-group">
                                             <label for="keluhan">Keluhan</label>
